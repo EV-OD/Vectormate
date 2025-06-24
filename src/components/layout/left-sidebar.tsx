@@ -3,6 +3,11 @@
 import {
   Eye,
   Lock,
+  RectangleHorizontal,
+  Circle,
+  Type,
+  Scissors,
+  Folder as GroupIcon,
 } from 'lucide-react';
 import {
   Accordion,
@@ -12,13 +17,16 @@ import {
 } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
+import { PenToolIcon } from '@/components/icons';
 
 const layers = [
-  { name: 'Header Text', type: 'Text' },
-  { name: 'Logo Shape', type: 'Path' },
-  { name: 'Button Background', type: 'Rectangle' },
-  { name: 'User Avatar', type: 'Ellipse' },
-  { name: 'Footer Group', type: 'Group' },
+  { name: 'Hero Illustration', icon: GroupIcon, type: 'Group' },
+  { name: 'Character Outline', icon: PenToolIcon, type: 'Path' },
+  { name: 'Shading', icon: PenToolIcon, type: 'Path' },
+  { name: 'Button Base', icon: RectangleHorizontal, type: 'Rectangle' },
+  { name: 'Icon Circle', icon: Circle, type: 'Ellipse' },
+  { name: 'Clipping Mask', icon: Scissors, type: 'Clip' },
+  { name: 'Main Title', icon: Type, type: 'Text' },
 ];
 
 export function LeftSidebar() {
@@ -35,7 +43,10 @@ export function LeftSidebar() {
                 <div className="flex flex-col gap-1 px-2">
                   {layers.map((layer, index) => (
                     <div key={index} className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-accent">
-                      <span>{layer.name}</span>
+                      <div className="flex items-center gap-2">
+                        <layer.icon className="h-4 w-4 text-muted-foreground" />
+                        <span>{layer.name}</span>
+                      </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                           <Eye className="h-4 w-4 hover:text-foreground" />
                           <Lock className="h-4 w-4 hover:text-foreground"/>
