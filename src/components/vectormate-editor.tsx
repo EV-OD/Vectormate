@@ -5,6 +5,7 @@ import { LeftSidebar } from '@/components/layout/left-sidebar';
 import { RightSidebar } from '@/components/layout/right-sidebar';
 import { BottomBar } from '@/components/layout/bottom-bar';
 import { CanvasWorkspace } from '@/components/canvas/workspace';
+import { ToolDock } from '@/components/layout/tool-dock';
 import { useState } from 'react';
 
 export function VectorMateEditor() {
@@ -16,7 +17,10 @@ export function VectorMateEditor() {
       <TopToolbar zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
       <div className="grid grid-cols-[auto_1fr_auto] overflow-hidden border-t">
         <LeftSidebar />
-        <CanvasWorkspace showGrid={showGrid} zoomLevel={zoomLevel} />
+        <div className="relative">
+          <CanvasWorkspace showGrid={showGrid} zoomLevel={zoomLevel} />
+          <ToolDock />
+        </div>
         <RightSidebar />
       </div>
       <BottomBar showGrid={showGrid} setShowGrid={setShowGrid} zoomLevel={zoomLevel} />

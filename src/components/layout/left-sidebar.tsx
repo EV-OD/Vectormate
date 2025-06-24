@@ -1,25 +1,9 @@
 'use client';
 
 import {
-  MousePointer2,
-  RectangleHorizontal,
-  Circle,
-  Baseline,
-  Type,
-  Hand,
-  Layers,
   Eye,
   Lock,
 } from 'lucide-react';
-import { PenToolIcon } from '@/components/icons';
-import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { Separator } from '@/components/ui/separator';
 import {
   Accordion,
   AccordionContent,
@@ -27,16 +11,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
-
-const tools = [
-  { icon: MousePointer2, label: 'Select (V)' },
-  { icon: RectangleHorizontal, label: 'Rectangle (R)' },
-  { icon: Circle, label: 'Ellipse (O)' },
-  { icon: PenToolIcon, label: 'Pen (P)' },
-  { icon: Baseline, label: 'Line (L)' },
-  { icon: Type, label: 'Text (T)' },
-  { icon: Hand, label: 'Pan (H)' },
-];
 
 const layers = [
   { name: 'Header Text', type: 'Text' },
@@ -49,30 +23,6 @@ const layers = [
 export function LeftSidebar() {
   return (
     <aside className="flex h-full w-64 flex-col border-r bg-card">
-      <div className="flex flex-none items-center justify-center p-2">
-        <div className="grid grid-cols-2 gap-1">
-          <TooltipProvider delayDuration={0}>
-            {tools.map((tool, index) => (
-              <Tooltip key={index}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={index === 0 ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="h-9 w-9"
-                    aria-label={tool.label}
-                  >
-                    <tool.icon className="h-5 w-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p>{tool.label}</p>
-                </TooltipContent>
-              </Tooltip>
-            ))}
-          </TooltipProvider>
-        </div>
-      </div>
-      <Separator />
       <div className="flex-grow overflow-hidden">
         <ScrollArea className="h-full">
         <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
