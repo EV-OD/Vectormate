@@ -50,12 +50,12 @@ export function LeftSidebar() {
               <AccordionContent>
                 <div className="flex flex-col gap-1 px-2">
                   {layers.map((layer, index) => (
-                    <div key={index} className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-accent">
-                      <div className="flex items-center gap-2">
-                        <layer.icon className="h-4 w-4 text-muted-foreground" />
-                        <span>{layer.name}</span>
+                    <div key={index} className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <layer.icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                        <span className="truncate">{layer.name}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
+                      <div className="flex flex-shrink-0 items-center gap-2 text-muted-foreground">
                           <Eye className="h-4 w-4 hover:text-foreground" />
                           <Lock className="h-4 w-4 hover:text-foreground"/>
                       </div>
