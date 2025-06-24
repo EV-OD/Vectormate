@@ -15,13 +15,11 @@ export function VectorMateEditor() {
   return (
     <div className="grid h-svh w-full grid-rows-[auto_1fr_auto] bg-background text-foreground">
       <TopToolbar zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
-      <div className="grid grid-cols-[auto_1fr_auto] overflow-hidden border-t">
+      <div className="relative overflow-hidden border-t">
+        <CanvasWorkspace showGrid={showGrid} zoomLevel={zoomLevel} />
         <LeftSidebar />
-        <div className="relative">
-          <CanvasWorkspace showGrid={showGrid} zoomLevel={zoomLevel} />
-          <ToolDock />
-        </div>
         <RightSidebar />
+        <ToolDock />
       </div>
       <BottomBar showGrid={showGrid} setShowGrid={setShowGrid} zoomLevel={zoomLevel} />
     </div>
