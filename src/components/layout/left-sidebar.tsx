@@ -48,9 +48,9 @@ export function LeftSidebar() {
                 Layers
               </AccordionTrigger>
               <AccordionContent>
-                <div className="flex flex-col gap-1 px-2">
+                <div className="flex flex-col gap-1">
                   {layers.map((layer, index) => (
-                    <div key={index} className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent">
+                    <div key={index} className="flex cursor-pointer items-center justify-between gap-2 rounded-md mx-2 px-2 py-1.5 text-sm hover:bg-accent">
                       <div className="flex min-w-0 items-center gap-2">
                         <layer.icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
                         <span className="truncate">{layer.name}</span>

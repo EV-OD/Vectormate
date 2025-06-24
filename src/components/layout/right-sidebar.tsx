@@ -24,7 +24,6 @@ import {
   Columns,
   Minus,
 } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
 import { BooleanOperationsIcon } from '@/components/icons';
 import { Card } from '@/components/ui/card';
 
@@ -37,7 +36,7 @@ export function RightSidebar() {
             
             <AccordionItem value="transform">
               <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">Transform</AccordionTrigger>
-              <AccordionContent className="p-2 space-y-4">
+              <AccordionContent className="px-4 space-y-4">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label htmlFor="x-pos">X</Label>
@@ -63,7 +62,7 @@ export function RightSidebar() {
 
             <AccordionItem value="appearance">
               <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">Appearance</AccordionTrigger>
-              <AccordionContent className="p-2 space-y-4">
+              <AccordionContent className="px-4 space-y-4">
                  <div>
                     <Label>Fill</Label>
                     <div className="flex items-center gap-2">
@@ -84,7 +83,7 @@ export function RightSidebar() {
 
             <AccordionItem value="typography">
               <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">Typography</AccordionTrigger>
-              <AccordionContent className="p-2 space-y-4">
+              <AccordionContent className="px-4 space-y-4">
                 <Select defaultValue="inter">
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -109,7 +108,7 @@ export function RightSidebar() {
             
             <AccordionItem value="align">
               <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">Align & Distribute</AccordionTrigger>
-              <AccordionContent className="p-2">
+              <AccordionContent className="px-4">
                   <div className="grid grid-cols-3 gap-1">
                       <Button variant="ghost" size="icon"><AlignHorizontalDistributeCenter/></Button>
                       <Button variant="ghost" size="icon"><AlignVerticalDistributeCenter/></Button>
@@ -121,7 +120,7 @@ export function RightSidebar() {
 
             <AccordionItem value="boolean">
               <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">Boolean Operations</AccordionTrigger>
-              <AccordionContent className="p-2">
+              <AccordionContent className="px-4">
                   <div className="grid grid-cols-4 gap-1">
                       <Button variant="ghost" size="icon"><BooleanOperationsIcon className="h-5 w-5"/></Button>
                       <Button variant="ghost" size="icon"><Minus/></Button>
