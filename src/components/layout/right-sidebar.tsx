@@ -32,7 +32,7 @@ export function RightSidebar() {
   return (
     <div className="absolute top-4 right-4 z-20">
       <Card className="w-72 bg-card/80 backdrop-blur-sm">
-        <ScrollArea className="max-h-[calc(100svh-12rem)]">
+        <ScrollArea className="max-h-[calc(100svh-8rem)]">
           <Accordion type="multiple" defaultValue={['transform', 'appearance', 'typography', 'align', 'boolean']} className="w-full p-2">
             
             <AccordionItem value="transform">

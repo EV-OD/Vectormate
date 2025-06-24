@@ -27,13 +27,21 @@ const layers = [
   { name: 'Icon Circle', icon: Circle, type: 'Ellipse' },
   { name: 'Clipping Mask', icon: Scissors, type: 'Clip' },
   { name: 'Main Title', icon: Type, type: 'Text' },
+  { name: 'Sub-heading', icon: Type, type: 'Text' },
+  { name: 'Footer links', icon: Type, type: 'Text' },
+  { name: 'Background Pattern', icon: PenToolIcon, type: 'Path' },
+  { name: 'Logo Shape', icon: PenToolIcon, type: 'Path' },
+  { name: 'User Avatar', icon: Circle, type: 'Ellipse' },
+  { name: 'CTA Button', icon: RectangleHorizontal, type: 'Rectangle' },
+  { name: 'Another Group', icon: GroupIcon, type: 'Group' },
+  { name: 'Some other path', icon: PenToolIcon, type: 'Path' },
 ];
 
 export function LeftSidebar() {
   return (
     <div className="absolute top-4 left-4 z-20">
       <Card className="w-64 bg-card/80 backdrop-blur-sm">
-        <ScrollArea className="max-h-[calc(100svh-12rem)]">
+        <ScrollArea className="max-h-[calc(100svh-8rem)]">
           <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
             <AccordionItem value="item-1" className="border-b-0">
               <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">
