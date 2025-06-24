@@ -15,7 +15,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { PenToolIcon } from '@/components/icons';
 
@@ -41,16 +40,16 @@ export function LeftSidebar() {
   return (
     <div className="absolute top-4 left-4 z-20">
       <Card className="w-64 bg-card/80 backdrop-blur-sm">
-        <ScrollArea className="max-h-[calc(100svh-8rem)]">
+        <div className="max-h-[calc(100svh-8rem)] overflow-y-auto custom-scrollbar">
           <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
             <AccordionItem value="item-1" className="border-b-0">
               <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">
                 Layers
               </AccordionTrigger>
-              <AccordionContent>
-                <div className="flex flex-col gap-1">
+              <AccordionContent className="pt-0 pb-1">
+                <div className="flex flex-col gap-0.5 px-1">
                   {layers.map((layer, index) => (
-                    <div key={index} className="flex cursor-pointer items-center justify-between gap-2 rounded-md mx-2 px-2 py-1.5 text-sm hover:bg-accent">
+                    <div key={index} className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-1.5 text-sm hover:bg-accent">
                       <div className="flex min-w-0 items-center gap-2">
                         <layer.icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
                         <span className="truncate">{layer.name}</span>
@@ -65,7 +64,7 @@ export function LeftSidebar() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        </ScrollArea>
+        </div>
       </Card>
     </div>
   );
