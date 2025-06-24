@@ -25,8 +25,13 @@ import {
 } from 'lucide-react';
 import { BooleanOperationsIcon } from '@/components/icons';
 import { Card } from '@/components/ui/card';
+import { useState } from 'react';
+import { ColorPicker } from '../ui/color-picker';
 
 export function RightSidebar() {
+  const [fillColor, setFillColor] = useState('rgba(51, 153, 255, 1)');
+  const [strokeColor, setStrokeColor] = useState('rgba(0, 0, 0, 1)');
+
   return (
     <div className="absolute top-4 right-4 z-20">
       <Card className="w-72 bg-card/80 backdrop-blur-sm">
@@ -63,19 +68,15 @@ export function RightSidebar() {
               <AccordionItem value="appearance">
                 <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">Appearance</AccordionTrigger>
                 <AccordionContent className="px-4 space-y-4">
-                  <div>
+                  <div className="space-y-2">
                       <Label>Fill</Label>
-                      <div className="flex items-center gap-2">
-                        <Input type="color" defaultValue="#3399FF" className="h-8 w-8 p-1"/>
-                        <Input defaultValue="#3399FF" className="flex-1"/>
-                      </div>
+                      <ColorPicker color={fillColor} onChange={setFillColor} />
                   </div>
-                  <div>
+                  <div className="space-y-2">
                       <Label>Stroke</Label>
                       <div className="flex items-center gap-2">
-                        <Input type="color" defaultValue="#000000" className="h-8 w-8 p-1"/>
-                        <Input defaultValue="#000000" className="flex-1"/>
-                        <Input type="number" defaultValue="1" className="w-16"/>
+                        <ColorPicker color={strokeColor} onChange={setStrokeColor} className="flex-1" />
+                        <Input type="number" defaultValue="1" className="w-16 h-8"/>
                       </div>
                   </div>
                 </AccordionContent>
@@ -118,7 +119,7 @@ export function RightSidebar() {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="boolean">
+              <AccordionItem value="boolean" className="border-b-0">
                 <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">Boolean Operations</AccordionTrigger>
                 <AccordionContent className="px-4">
                     <div className="grid grid-cols-4 gap-1">

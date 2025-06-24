@@ -16,8 +16,12 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import { Switch } from '../ui/switch';
+import { useState } from 'react';
+import { ColorPicker } from '../ui/color-picker';
 
 export function CanvasSettingsPanel() {
+  const [bgColor, setBgColor] = useState('rgba(33, 42, 53, 1)');
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -45,11 +49,8 @@ export function CanvasSettingsPanel() {
                 </div>
             </div>
             <div className="space-y-2">
-                <Label htmlFor="bg-color">Background Color</Label>
-                <div className="flex items-center gap-2">
-                    <Input type="color" id="bg-color-picker" defaultValue="#F0F8FF" className="h-10 w-10 p-1"/>
-                    <Input id="bg-color" defaultValue="#F0F8FF" />
-                </div>
+                <Label>Background Color</Label>
+                <ColorPicker color={bgColor} onChange={setBgColor} />
             </div>
             <Separator />
             <div className="space-y-4">
