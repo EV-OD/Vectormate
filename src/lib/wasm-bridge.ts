@@ -8,7 +8,7 @@ let wasmInstance: any = null;
 // Placeholder functions that will be replaced by cwrap'd WASM functions
 const placeholders = {
   initialize_canvas: (width: number, height: number) => console.log(`WASM: initialize_canvas(${width}, ${height})`),
-  render: () => { /* This will be called in the render loop */ },
+  render: () => { /* This is where the C++/WASM code would execute WebGL commands to draw the scene */ },
   on_mouse_down: (x: number, y: number, button: number) => console.log(`WASM: on_mouse_down(${x}, ${y}, ${button})`),
   on_mouse_move: (x: number, y: number) => { /* console.log(`WASM: on_mouse_move(${x}, ${y})`) */ },
   on_mouse_up: (x: number, y: number, button: number) => console.log(`WASM: on_mouse_up(${x}, ${y}, ${button})`),
