@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SDL2 WASM Test</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        canvas { border: 2px solid #333; display: block; margin: 20px 0; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; font-family: monospace; }
+        button { padding: 10px 20px; margin: 5px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>SDL2 WASM Rectangle Test</h1>
+    <p>This is a direct test of our SDL2 WASM module:</p>
+    
+    <canvas id="canvas" width="400" height="300"></canvas>
+    
+    <div>
+        <button onclick="initializeTest()">Initialize SDL2</button>
+        <button onclick="drawTest()">Draw Rectangle</button>
+        <button onclick="testModule()">Test Module</button>
+    </div>
+    
+    <div class="debug" id="debug">Debug output will appear here...</div>
+    
+    <script src="/vectormate.js"></script>
+    <script>
+        let wasmModule = null;
+        let debugDiv = document.getElementById('debug');
+        
+        function log(message) {
+            console.log(message);
+            debugDiv.innerHTML += message + '<br>';
+        }
+        
+        async function testModule() {
+            log('Testing WASM module...');
+            
+            try {
+                if (typeof VectorMateModule === 'undefined') {
+                    log('ERROR: VectorMateModule not found!');
+                    return;
+                }
+                log('✓ VectorMateModule found');
+                
+                const canvas = document.getElementById('canvas');
+                log('Canvas element: ' + canvas);
+                
+                wasmModule = await VectorMateModule({
+                    canvas: canvas,
+                    onRuntimeInitialized: () => {
+                        log('✓ WASM Runtime initialized!');
+                    },
+                    print: (text) => {
+                        log('WASM: ' + text);
+                    },
+                    printErr: (text) => {
+                        log('WASM ERROR: ' + text);
+                    }
+                });
+                
+                log('✓ WASM module loaded successfully');
+                
+                // Test function exports
+                if (wasmModule.cwrap) {
+                    log('✓ cwrap available');
+                    const initCanvas = wasmModule.cwrap('initialize_canvas', 'void', ['number', 'number']);
+                    const render = wasmModule.cwrap('render', 'void', []);
+                    
+                    log('Calling initialize_canvas(400, 300)...');
+                    initCanvas(400, 300);
+                    
+                    log('Calling render()...');
+                    render();
+                    
+                    log('✓ SDL2 functions called successfully!');
+                } else {
+                    log('ERROR: cwrap not available');
+                }
+                
+            } catch (error) {
+                log('ERROR: ' + error);
+            }
+        }
+        
+        async function initializeTest() {
+            log('Initializing SDL2 test...');
+            await testModule();
+        }
+        
+        function drawTest() {
+            if (!wasmModule) {
+                log('ERROR: WASM module not loaded. Run Initialize SDL2 first.');
+                return;
+            }
+            
+            try {
+                const render = wasmModule.cwrap('render', 'void', []);
+                log('Calling render() for manual draw test...');
+                render();
+                log('✓ Render called');
+            } catch (error) {
+                log('ERROR in drawTest: ' + error);
+            }
+        }
+        
+        // Auto-start test when page loads
+        window.onload = () => {
+            log('Page loaded, starting auto test...');
+            setTimeout(testModule, 1000);
+        };
+    </script>
+</body>
+</html>
