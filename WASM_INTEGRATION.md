@@ -8,7 +8,7 @@ This document outlines the requirements and function signatures for the WebAssem
 2.  **Build Process**: The C++ code should be compiled into a `.wasm` file and a corresponding JavaScript loader file (`.js`).
     ```bash
     # Example compilation command using emcc
-    emcc src/main.cpp -o public/vectormate.js -s WASM=1 -s USE_WEBGL2=1 -s FULL_ES3=1 -s "EXPORTED_FUNCTIONS=['_initialize_canvas', '_render', '_on_mouse_down', '_on_mouse_move', '_on_mouse_up', '_on_key_down', '_resize_canvas', '_set_canvas_background', '_set_grid_settings']" -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']"
+    emcc src/main.cpp -o public/vectormate.js -s WASM=1 -s USE_WEBGL2=1 -s FULL_ES3=1 -s "EXPORTED_FUNCTIONS=['_initialize_canvas', '_render', '_on_mouse_down', '_on_mouse_move', '_on_mouse_up', '_on_key_down', '_resize_canvas', '_set_canvas_background', '_set_grid_settings']" -s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']"
     ```
 3.  **Loading in Next.js**: The generated `vectormate.js` and `vectormate.wasm` files should be placed in the `public/` directory. The application will load the script and instantiate the WASM module. The `src/lib/wasm-bridge.ts` file is the intermediary for this interaction.
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { initializeWasm, wasmApi } from '@/lib/wasm-bridge';
+import { initializeWasm, wasmApi, loadWasmScript } from '@/lib/wasm-bridge';
 import { cn } from '@/lib/utils';
 
 interface CanvasWorkspaceProps {
@@ -12,27 +12,79 @@ interface CanvasWorkspaceProps {
 export function CanvasWorkspace({ showGrid, zoomLevel }: CanvasWorkspaceProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Initialize WASM module once on mount
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas) {
-      // Initialize the WASM module with the canvas
-      initializeWasm(canvas).then((success) => {
-        if (success) {
-          // Set initial size and start the render loop
-          const { width, height } = canvas.getBoundingClientRect();
-          wasmApi.initializeCanvas(width, height);
-          wasmApi.runRenderLoop();
-        }
-      });
-      
-      const handleKeyDown = (event: KeyboardEvent) => wasmApi.onKeyDown(event.key);
-      window.addEventListener('keydown', handleKeyDown);
+    if (!canvas) return;
 
-      return () => {
-        window.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-  }, []);
+    let resizeObserver: ResizeObserver | null = null;
+
+    // Load WASM script and initialize the module
+    const initializeWasmModule = async () => {
+      try {
+        await loadWasmScript();
+        const success = await initializeWasm(canvas);
+        
+        if (success) {
+          // Wait for the canvas to be properly sized
+          const updateCanvasSize = () => {
+            const rect = canvas.getBoundingClientRect();
+            const width = Math.max(rect.width, 800); // Minimum width
+            const height = Math.max(rect.height, 600); // Minimum height
+            
+            // Set canvas internal resolution to match display size
+            canvas.width = width;
+            canvas.height = height;
+            
+            console.log(`Setting canvas size to: ${width}x${height}`);
+            wasmApi.initializeCanvas(width, height);
+            wasmApi.resizeCanvas(width, height);
+          };
+          
+          // Wait a frame to ensure layout is complete
+          requestAnimationFrame(() => {
+            // Initial size setup
+            updateCanvasSize();
+            
+            // Start the render loop
+            wasmApi.runRenderLoop();
+            
+            // Set initial background
+            wasmApi.setCanvasBackground(0.94, 0.94, 0.94, 1.0); // Light gray background
+            
+            // Log canvas element details for debugging
+            console.log('Canvas element:', canvas);
+            console.log('Canvas computed style:', window.getComputedStyle(canvas));
+            console.log('Canvas position:', canvas.getBoundingClientRect());
+          });
+          
+          // Add resize observer to handle canvas resizing
+          resizeObserver = new ResizeObserver(() => {
+            updateCanvasSize();
+          });
+          resizeObserver.observe(canvas);
+        }
+      } catch (error) {
+        console.error('Failed to initialize WASM module:', error);
+      }
+    };
+
+    initializeWasmModule();
+    
+    const handleKeyDown = (event: KeyboardEvent) => wasmApi.onKeyDown(event.key);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      wasmApi.stopRenderLoop();
+      resizeObserver?.disconnect();
+    };
+  }, []); // Empty dependency array - only run once
+
+  // Update grid settings when showGrid changes
+  useEffect(() => {
+    wasmApi.setGridSettings(showGrid, 20);
+  }, [showGrid]);
 
   const handleMouseEvent = (handler: (x: number, y: number, button: number) => void) => (
     event: React.MouseEvent<HTMLCanvasElement>
@@ -54,7 +106,7 @@ export function CanvasWorkspace({ showGrid, zoomLevel }: CanvasWorkspaceProps) {
 
   return (
     <main
-      className="relative flex-1 cursor-crosshair overflow-hidden bg-muted/40"
+      className="relative flex-1 cursor-crosshair bg-muted/40 h-full"
       style={
         {
           '--grid-size': `${gridSize}px`,
@@ -63,16 +115,22 @@ export function CanvasWorkspace({ showGrid, zoomLevel }: CanvasWorkspaceProps) {
         } as React.CSSProperties
       }
     >
-      <div className={cn(
-        "absolute inset-0 bg-[length:var(--grid-size)_var(--grid-size)]",
-        showGrid && "bg-[linear-gradient(to_right,var(--grid-color)_1px,transparent_1px),linear-gradient(to_bottom,var(--grid-color)_1px,transparent_1px)]"
-        )}>
+      <div className="absolute inset-0 w-full h-full">
         <canvas
             ref={canvasRef}
-            className="h-full w-full"
+            id="canvas"
+            className="w-full h-full block"
+            style={{ 
+              minHeight: '400px',
+              minWidth: '600px',
+              display: 'block',
+              backgroundColor: 'white',
+              border: '1px solid #ddd'
+            }}
             onMouseDown={handleMouseEvent(wasmApi.onMouseDown)}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseEvent(wasmApi.onMouseUp)}
+            onContextMenu={(e) => e.preventDefault()} // Prevent right-click menu
         />
       </div>
     </main>

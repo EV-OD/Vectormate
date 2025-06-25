@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple SDL2 Test</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        canvas { border: 2px solid #333; display: block; margin: 20px 0; background: black; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; font-family: monospace; }
+        button { padding: 10px 20px; margin: 5px; font-size: 16px; }
+        .status { background: #e8f5e8; padding: 10px; margin: 10px 0; border-left: 4px solid green; }
+    </style>
+</head>
+<body>
+    <h1>Simple SDL2 Rectangle Test</h1>
+    <p>This tests the exact SDL2 pattern from the documentation:</p>
+    
+    <div class="status" id="status">Loading...</div>
+    
+    <canvas id="canvas" width="400" height="300"></canvas>
+    
+    <div>
+        <button onclick="testInit()">Initialize SDL2</button>
+        <button onclick="testRender()">Render</button>
+    </div>
+    
+    <div class="debug" id="debug">
+        <strong>Expected:</strong> Green rectangle (10,10,150x100) and red rectangle (180,50,120x80)<br>
+        <strong>Debug output:</strong><br>
+    </div>
+    
+    <script src="/simple.js"></script>
+    <script>
+        let simpleModule = null;
+        let debugDiv = document.getElementById('debug');
+        let statusDiv = document.getElementById('status');
+        
+        function log(message) {
+            console.log(message);
+            debugDiv.innerHTML += message + '<br>';
+        }
+        
+        function updateStatus(message, isSuccess = false) {
+            statusDiv.textContent = message;
+            statusDiv.style.background = isSuccess ? '#e8f5e8' : '#ffe8e8';
+            statusDiv.style.borderColor = isSuccess ? 'green' : 'red';
+        }
+        
+        async function loadModule() {
+            try {
+                updateStatus('Loading WASM module...');
+                
+                if (typeof SimpleModule === 'undefined') {
+                    updateStatus('ERROR: SimpleModule not found!');
+                    return false;
+                }
+                
+                const canvas = document.getElementById('canvas');
+                
+                simpleModule = await SimpleModule({
+                    canvas: canvas,
+                    onRuntimeInitialized: () => {
+                        log('✓ Simple module runtime initialized!');
+                        updateStatus('WASM module loaded successfully!', true);
+                    },
+                    print: (text) => {
+                        log('WASM: ' + text);
+                    },
+                    printErr: (text) => {
+                        log('WASM ERROR: ' + text);
+                        updateStatus('WASM Error: ' + text);
+                    }
+                });
+                
+                return true;
+                
+            } catch (error) {
+                updateStatus('Failed to load module: ' + error);
+                log('ERROR: ' + error);
+                return false;
+            }
+        }
+        
+        async function testInit() {
+            if (!simpleModule) {
+                const loaded = await loadModule();
+                if (!loaded) return;
+            }
+            
+            try {
+                log('Calling simple_init()...');
+                updateStatus('Initializing SDL2...');
+                
+                const initFunc = simpleModule.cwrap('simple_init', 'void', []);
+                initFunc();
+                
+                log('✓ SDL2 initialized successfully!');
+                updateStatus('SDL2 initialized! You should see rectangles.', true);
+                
+            } catch (error) {
+                updateStatus('Init failed: ' + error);
+                log('ERROR in testInit: ' + error);
+            }
+        }
+        
+        function testRender() {
+            if (!simpleModule) {
+                updateStatus('Module not loaded. Click Initialize first.');
+                return;
+            }
+            
+            try {
+                log('Calling simple_render()...');
+                const renderFunc = simpleModule.cwrap('simple_render', 'void', []);
+                renderFunc();
+                log('✓ Render called');
+                
+            } catch (error) {
+                updateStatus('Render failed: ' + error);
+                log('ERROR in testRender: ' + error);
+            }
+        }
+        
+        // Auto-start when page loads
+        window.onload = async () => {
+            log('Page loaded, auto-starting test...');
+            await loadModule();
+            setTimeout(testInit, 500);
+        };
+    </script>
+</body>
+</html>
