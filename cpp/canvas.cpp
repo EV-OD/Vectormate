@@ -190,5 +190,11 @@ void Canvas::cleanup()
 void Canvas::handleMouseClick(int x, int y)
 {
     // Handle mouse click events
+    if(show_grid){
+            set_grid_settings(false, 10);
+    }else{
+            set_grid_settings(true, 10);
+
+    }
     std::cout << "SDL2: Mouse clicked at (" << x << ", " << y << ")" << std::endl;
 }
