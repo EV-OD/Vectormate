@@ -35,18 +35,22 @@ if (-not (Test-Path "public")) {
 }
 
 # Build parameters
-$sourceFile = "cpp/main.cpp"
+$sourceFiles = @("cpp/main.cpp", "cpp/canvas.cpp")
+$includeDir = "cpp/includes"
 $outputFile = "public/vectormate.js"
 
-# Check if source file exists
-if (-not (Test-Path $sourceFile)) {
-    Write-Host "✗ Error: Source file '$sourceFile' not found" -ForegroundColor $ErrorColor
-    exit 1
+# Check if source files exist
+foreach ($sourceFile in $sourceFiles) {
+    if (-not (Test-Path $sourceFile)) {
+        Write-Host "✗ Error: Source file '$sourceFile' not found" -ForegroundColor $ErrorColor
+        exit 1
+    }
 }
 
 # Compiler flags
 $cflags = @(
     "-std=c++17"
+    "-I$includeDir"
     if ($Debug) { "-g", "-DDEBUG" } else { "-O2" }
 )
 
@@ -73,7 +77,7 @@ $exportedRuntime = @(
 )
 
 # Build command
-$buildCommand = @("emcc") + $cflags + $wasmFlags + $exportedFunctions + $exportedRuntime + @($sourceFile, "-o", $outputFile)
+$buildCommand = @("emcc") + $cflags + $wasmFlags + $exportedFunctions + $exportedRuntime + $sourceFiles + @("-o", $outputFile)
 
 Write-Host "Building WASM module..." -ForegroundColor $InfoColor
 if ($Debug) {

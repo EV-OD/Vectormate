@@ -46,7 +46,7 @@ all: $(OUTPUT_JS)
 # Build the WASM module
 $(OUTPUT_JS): $(SOURCE)
 	@echo "Building VectorMate WASM module..."
-	@mkdir -p $(OUTPUT_DIR)
+	@if not exist $(OUTPUT_DIR) mkdir $(OUTPUT_DIR)
 	$(EMCC) $(CFLAGS) $(INCLUDES) $(WASM_FLAGS) $(EXPORTED_FUNCTIONS) $(EXPORTED_RUNTIME) \
 		$(SOURCE) -o $(OUTPUT_JS)
 	@echo "Build complete! Files generated:"
@@ -56,7 +56,8 @@ $(OUTPUT_JS): $(SOURCE)
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	@rm -f $(OUTPUT_JS) $(OUTPUT_WASM)
+	@if exist $(OUTPUT_JS) del $(OUTPUT_JS)
+	@if exist $(OUTPUT_WASM) del $(OUTPUT_WASM)
 	@echo "Clean complete!"
 
 # Debug build with more verbose output

@@ -11,38 +11,6 @@
 // Global state
 Canvas::Canvas(int width, int height )
 {
-
-    // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
-        return;
-    }
-
-    // Create window
-    window = SDL_CreateWindow("SDL2 Canvas", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
-    if (!window)
-    {
-        std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        return;
-    }
-
-    // Create renderer
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (!renderer)
-    {
-        std::cerr << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return;
-    }
-
-    // Set background color
-    SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, background_color.b, background_color.a);
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
-
     std::cout << "Initializing SDL2 canvas: " << width << "x" << height << std::endl;
 
     // Ensure minimum dimensions
@@ -66,15 +34,56 @@ Canvas::Canvas(int width, int height )
     }
     std::cout << "SDL initialized successfully" << std::endl;
 
-    // Use the recommended approach from SDL2 docs: SDL_CreateWindowAndRenderer
+    // For Emscripten, we need to use the proper renderer flags
+    // Try different renderer creation strategies
+    
+    // First try: Use SDL_CreateWindowAndRenderer (recommended for Emscripten)
     if (SDL_CreateWindowAndRenderer(canvas_width, canvas_height, 0, &window, &renderer) < 0)
     {
-        std::cerr << "Window and Renderer creation failed: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        return;
+        std::cout << "SDL_CreateWindowAndRenderer failed: " << SDL_GetError() << std::endl;
+        
+        // Second try: Create window first, then renderer with specific flags
+        window = SDL_CreateWindow("SDL2 Canvas", 
+                                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+                                 canvas_width, canvas_height, 
+                                 SDL_WINDOW_SHOWN);
+        
+        if (!window)
+        {
+            std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+            SDL_Quit();
+            return;
+        }
+        
+        // Try software renderer first (more compatible with Emscripten)
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+        if (!renderer)
+        {
+            std::cout << "Software renderer failed, trying accelerated: " << SDL_GetError() << std::endl;
+            renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        }
+        
+        if (!renderer)
+        {
+            std::cout << "Accelerated renderer failed, trying default: " << SDL_GetError() << std::endl;
+            renderer = SDL_CreateRenderer(window, -1, 0); // Default flags
+        }
+        
+        if (!renderer)
+        {
+            std::cerr << "All renderer creation attempts failed! SDL_Error: " << SDL_GetError() << std::endl;
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return;
+        }
     }
 
     std::cout << "SDL window and renderer created successfully" << std::endl;
+    
+    // Set initial background color
+    SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, background_color.b, background_color.a);
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
 }
 
 
