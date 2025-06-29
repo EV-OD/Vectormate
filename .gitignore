@@ -43,3 +43,18 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+
+
+public/vectormate.js
+public/vectormate.wasm
+
+a.out.wasm
+test.c
+test.html
+test.js
+test.wasm
+a.out.js
+a.out.wasm
+
+#vscode
+.vscode/
