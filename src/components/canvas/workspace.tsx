@@ -124,7 +124,6 @@ export function CanvasWorkspace({ showGrid, zoomLevel }: CanvasWorkspaceProps) {
               minHeight: '400px',
               minWidth: '600px',
               display: 'block',
-              backgroundColor: 'white',
               border: '1px solid #ddd'
             }}
             onMouseDown={handleMouseEvent(wasmApi.onMouseDown)}

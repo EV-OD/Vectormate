@@ -8,6 +8,7 @@
 #include "canvas.h"
 
 
+
 Canvas *canvas = nullptr;
 // Function declarations for the required WASM exports
 extern "C"
@@ -19,7 +20,7 @@ extern "C"
     void on_mouse_up(int x, int y, int button);
     void on_key_down(const char *key);
     void resize_canvas(int new_width, int new_height);
-    void set_canvas_background(float r, float g, float b, float a);
+    void set_canvas_background(int r, int g, int b, int a);
     void set_grid_settings(bool show, int size);
 }
 
@@ -55,7 +56,7 @@ void on_key_down(const char *key) {
 void resize_canvas(int new_width, int new_height) {
 }
 
-void set_canvas_background(float r, float g, float b, float a) {
+void set_canvas_background(int r, int g, int b, int a) {
     if (canvas) {
         canvas->setBackgroundColor(r, g, b, a);
     }

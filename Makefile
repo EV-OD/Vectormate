@@ -33,8 +33,8 @@ EXPORTED_FUNCTIONS = -s "EXPORTED_FUNCTIONS=[ \
 EXPORTED_RUNTIME = -s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']"
 
 # Source and output files
-SOURCE =cpp/canvas.cpp cpp/main.cpp
-
+# SOURCE = cpp/canvas.cpp cpp/main.cpp 
+SOURCE = $(wildcard cpp/*.cpp)
 INCLUDES = -Icpp/includes
 OUTPUT_DIR = public
 OUTPUT_JS = $(OUTPUT_DIR)/vectormate.js
@@ -46,7 +46,7 @@ all: $(OUTPUT_JS)
 # Build the WASM module
 $(OUTPUT_JS): $(SOURCE)
 	@echo "Building VectorMate WASM module..."
-	@if not exist $(OUTPUT_DIR) mkdir $(OUTPUT_DIR)
+	@mkdir -p $(OUTPUT_DIR)
 	$(EMCC) $(CFLAGS) $(INCLUDES) $(WASM_FLAGS) $(EXPORTED_FUNCTIONS) $(EXPORTED_RUNTIME) \
 		$(SOURCE) -o $(OUTPUT_JS)
 	@echo "Build complete! Files generated:"
@@ -56,8 +56,8 @@ $(OUTPUT_JS): $(SOURCE)
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	@if exist $(OUTPUT_JS) del $(OUTPUT_JS)
-	@if exist $(OUTPUT_WASM) del $(OUTPUT_WASM)
+	@rm -f $(OUTPUT_JS)
+	@rm -f $(OUTPUT_WASM)
 	@echo "Clean complete!"
 
 # Debug build with more verbose output
