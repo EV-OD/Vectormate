@@ -7,9 +7,10 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include "states.h"
 
 // Global state
-Canvas::Canvas(int width, int height )
+Canvas::Canvas(int width, int height)
 {
     std::cout << "Initializing SDL2 canvas: " << width << "x" << height << std::endl;
 
@@ -36,25 +37,25 @@ Canvas::Canvas(int width, int height )
 
     // For Emscripten, we need to use the proper renderer flags
     // Try different renderer creation strategies
-    
+
     // First try: Use SDL_CreateWindowAndRenderer (recommended for Emscripten)
     if (SDL_CreateWindowAndRenderer(canvas_width, canvas_height, 0, &window, &renderer) < 0)
     {
         std::cout << "SDL_CreateWindowAndRenderer failed: " << SDL_GetError() << std::endl;
-        
+
         // Second try: Create window first, then renderer with specific flags
-        window = SDL_CreateWindow("SDL2 Canvas", 
-                                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                                 canvas_width, canvas_height, 
-                                 SDL_WINDOW_SHOWN);
-        
+        window = SDL_CreateWindow("SDL2 Canvas",
+                                  SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                  canvas_width, canvas_height,
+                                  SDL_WINDOW_SHOWN);
+
         if (!window)
         {
             std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
             SDL_Quit();
             return;
         }
-        
+
         // Try software renderer first (more compatible with Emscripten)
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
         if (!renderer)
@@ -62,13 +63,13 @@ Canvas::Canvas(int width, int height )
             std::cout << "Software renderer failed, trying accelerated: " << SDL_GetError() << std::endl;
             renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
         }
-        
+
         if (!renderer)
         {
             std::cout << "Accelerated renderer failed, trying default: " << SDL_GetError() << std::endl;
             renderer = SDL_CreateRenderer(window, -1, 0); // Default flags
         }
-        
+
         if (!renderer)
         {
             std::cerr << "All renderer creation attempts failed! SDL_Error: " << SDL_GetError() << std::endl;
@@ -79,13 +80,12 @@ Canvas::Canvas(int width, int height )
     }
 
     std::cout << "SDL window and renderer created successfully" << std::endl;
-    
+
     // Set initial background color
     SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, background_color.b, background_color.a);
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
 }
-
 
 void Canvas::draw_grid(SDL_Renderer *renderer)
 {
@@ -129,7 +129,6 @@ void Canvas::render()
     // Draw grid
     draw_grid(renderer);
 
-
     // Present the rendered frame (like in the docs)
     SDL_RenderPresent(renderer);
 
@@ -138,7 +137,7 @@ void Canvas::render()
     frame_count++;
     if (frame_count % 60 == 0)
     {
-        std::cout << "SDL2: Rendered frame " << frame_count << " - Rectangle at ("<<std::endl;
+        std::cout << "SDL2: Rendered frame " << frame_count << " - Rectangle at (" << std::endl;
     }
 }
 
@@ -153,12 +152,18 @@ void resize_canvas(int new_width, int new_height)
 }
 
 // Set canvas background color
-void Canvas::setBackgroundColor(float r, float g, float b, float a)
+void Canvas::setBackgroundColor(int r, int g, int b, int a)
 {
-    background_color.r = (Uint8)(r * 255);
-    background_color.g = (Uint8)(g * 255);
-    background_color.b = (Uint8)(b * 255);
-    background_color.a = (Uint8)(a * 255);
+    using namespace CanvasStates;
+    bg[0] = (Uint8)r;
+    bg[1] = (Uint8)g;
+    bg[2] = (Uint8)b;
+    // bg[3] = (Uint8)a;
+
+    background_color.r = (Uint8)(r);
+    background_color.g = (Uint8)(g);
+    background_color.b = (Uint8)(b);
+    background_color.a = (Uint8)(a);
 
     std::cout << "SDL2: Background color set to: (" << (int)background_color.r
               << ", " << (int)background_color.g
@@ -189,12 +194,12 @@ void Canvas::cleanup()
 
 void Canvas::handleMouseClick(int x, int y)
 {
-    // Handle mouse click events
-    if(show_grid){
-            set_grid_settings(false, 10);
-    }else{
-            set_grid_settings(true, 10);
+    // // Handle mouse click events
+    // if(show_grid){
+    //         set_grid_settings(false, 20);
+    // }else{
+    //         set_grid_settings(true, 20);
 
-    }
+    // }
     std::cout << "SDL2: Mouse clicked at (" << x << ", " << y << ")" << std::endl;
 }
