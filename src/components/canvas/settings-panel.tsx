@@ -37,7 +37,7 @@ export function CanvasSettingsPanel() {
           Canvas Settings
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="custom-scrollbar">
         <SheetHeader>
           <SheetTitle>Canvas Settings</SheetTitle>
           <SheetDescription>
@@ -78,13 +78,8 @@ export function CanvasSettingsPanel() {
                 id="grid-size" 
                 type="number"
                 min="1"
-                value={gridSize}
-                onChange={(e) => {
-                  const newSize = parseInt(e.target.value, 10);
-                  if (!isNaN(newSize)) {
-                    setGridSize(newSize);
-                  }
-                }}
+                value={gridSize || ''}
+                onChange={(e) => setGridSize(parseInt(e.target.value) || 0)}
               />
             </div>
             <div className="flex items-center justify-between">
