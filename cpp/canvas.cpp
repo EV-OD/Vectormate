@@ -14,6 +14,10 @@ Canvas::Canvas(int width, int height)
 {
     std::cout << "Initializing SDL2 canvas: " << width << "x" << height << std::endl;
 
+    // Make SDL only capture keyboard when #canvas is focused.
+    // This is the key to preventing SDL from blocking text input in other UI elements.
+    SDL_SetHint(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas");
+
     // Ensure minimum dimensions
     canvas_width = std::max(width, 300); // Use smaller minimum for testing
     canvas_height = std::max(height, 300);

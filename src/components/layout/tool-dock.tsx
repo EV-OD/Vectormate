@@ -31,7 +31,7 @@ const tools = [
 
 export function ToolDock() {
   return (
-    <div data-interactive-panel="true" className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
       <TooltipProvider delayDuration={0}>
         <Card className="p-1 bg-card/80 backdrop-blur-sm">
           <div className="flex items-center gap-1">

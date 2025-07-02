@@ -34,7 +34,7 @@ export function RightSidebar() {
   const [strokeColor, setStrokeColor] = useState('rgba(0, 0, 0, 1)');
 
   return (
-    <div data-interactive-panel="true" className="absolute top-4 right-4 z-20">
+    <div className="absolute top-4 right-4 z-20">
       <Card className="w-72 bg-card/80 backdrop-blur-sm">
         <div className="max-h-[calc(100svh-8rem)] overflow-y-auto custom-scrollbar">
           <div className="pr-1">

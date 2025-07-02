@@ -58,23 +58,28 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
   if (wasmInstance) {
     return true;
   }
-  
+
   try {
-    // Set the canvas ID that Emscripten expects
+    // === SETUP CANVAS FOR SDL2 + WEB UI ===
     canvas.id = 'canvas';
-    
-    // Load the WASM module
+    // The canvas needs a tabindex to be focusable, which is required for it
+    // to receive keyboard events.
+    canvas.setAttribute('tabindex', '0');
+    canvas.style.outline = 'none'; // remove browser focus ring
+
+    // Let canvas gain focus on click so it can receive keyboard events.
+    canvas.addEventListener('click', () => canvas.focus());
+
+
+    // === LOAD WASM MODULE ===
     const VectorMateModule = (window as any).VectorMateModule;
-    
+
     if (!VectorMateModule) {
       console.log("VectorMateModule not found. Using placeholder API.");
-      // Use placeholder API for development
       currentApi = placeholderApi;
       return true;
     }
 
-    // Initialize the module with the canvas
-    // === WASM MODULE INSTANTIATION & CALLBACKS ===
     wasmInstance = await VectorMateModule({
       canvas: canvas,
       onRuntimeInitialized: () => {
@@ -83,14 +88,13 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
       print: (text: string) => { console.log(text) },
       printErr: (text: string) => { console.error(text) }
     });
-    // === END WASM MODULE INSTANTIATION ===
 
     if (!wasmInstance) {
       console.error("Failed to initialize WASM module");
       return false;
     }
-    
-    // Wait for runtime to be initialized
+
+    // Wait for runtime to be fully initialized
     await new Promise<void>((resolve) => {
       const checkInit = () => {
         if (isInitialized) {
@@ -102,7 +106,7 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
       checkInit();
     });
 
-    // Wrap the exported functions using cwrap for type safety and better performance
+    // Wrap exported functions
     const wrappedFunctions: WasmApi = {
       initialize_canvas: wasmInstance.cwrap('initialize_canvas', 'void', ['number', 'number']),
       render: wasmInstance.cwrap('render', 'void', []),
@@ -115,7 +119,6 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
       set_grid_settings: wasmInstance.cwrap('set_grid_settings', 'void', ['boolean', 'number']),
     };
 
-    // Replace the placeholder API with the real wrapped functions
     currentApi = wrappedFunctions;
     isInitialized = true;
 
@@ -126,9 +129,10 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
     console.error("Error initializing WASM module:", error);
     console.log("Using placeholder API instead.");
     currentApi = placeholderApi;
-    return true; // Still return true to allow development without WASM
+    return true; // still allow dev without WASM
   }
 }
+
 
 /**
  * Check if WASM module is initialized

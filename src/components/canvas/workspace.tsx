@@ -64,22 +64,7 @@ export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
 
     initializeWasmModule();
     
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement;
-
-      // If the event originates from inside an interactive panel, let the panel handle it.
-      // Do not send the event to the WASM module.
-      if (target.closest('[data-interactive-panel="true"]')) {
-        return;
-      }
-
-      // Otherwise, the event is for the canvas
-      wasmApi.onKeyDown(event.key);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
       wasmApi.stopRenderLoop();
       resizeObserver?.disconnect();
     };
@@ -133,6 +118,7 @@ export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
             onMouseDown={handleMouseEvent(wasmApi.onMouseDown)}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseEvent(wasmApi.onMouseUp)}
+            onKeyDown={(e) => wasmApi.onKeyDown(e.key)}
             onContextMenu={(e) => e.preventDefault()} // Prevent right-click menu
         />
       </div>
