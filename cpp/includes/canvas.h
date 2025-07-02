@@ -10,7 +10,7 @@ public:
     int canvas_width;  // Width of the canvas
     int canvas_height; // Height of the canvas
 
-    bool show_grid = true;
+    bool show_grid = false;
     int grid_size = 20;
 
     SDL_Color background_color = {CanvasStates::bg[0], CanvasStates::bg[1], CanvasStates::bg[2], CanvasStates::bg[3]};

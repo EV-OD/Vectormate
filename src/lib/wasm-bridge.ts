@@ -77,19 +77,23 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
     console.log("VectorMateModule found, initializing...");
 
     // Initialize the module with the canvas
+    // === WASM MODULE INSTANTIATION & CALLBACKS ===
     wasmInstance = await VectorMateModule({
       canvas: canvas,
       onRuntimeInitialized: () => {
-        console.log("WASM Runtime initialized successfully");
-        isInitialized = true;
+      console.log("%cWASM Runtime initialized successfully", "color: green; font-weight: bold;");
+      isInitialized = true;
       },
       print: (text: string) => {
-        console.log("WASM stdout:", text);
+      // Extra highlighting for stdout
+      console.log("%cWASM stdout:", "color: blue; font-weight: bold;", text);
       },
       printErr: (text: string) => {
-        console.error("WASM stderr:", text);
+      // Extra highlighting for stderr
+      console.error("%cWASM stderr:", "color: red; font-weight: bold;", text);
       }
     });
+    // === END WASM MODULE INSTANTIATION ===
 
     if (!wasmInstance) {
       console.error("Failed to initialize WASM module");
@@ -152,7 +156,7 @@ export function isWasmInitialized(): boolean {
  */
 export function startRenderLoop(): void {
   if (renderLoopId) {
-    console.log("Render loop already running");
+    // console.log("Render loop already running");
     return;
   }
 
@@ -166,7 +170,7 @@ export function startRenderLoop(): void {
   };
 
   renderLoopId = requestAnimationFrame(renderFrame);
-  console.log("Render loop started");
+  // console.log("Render loop started");
 }
 
 /**
@@ -199,7 +203,7 @@ export const wasmApi = {
     }
   },
   runRenderLoop: () => {
-    console.log('wasmApi.runRenderLoop called');
+    // console.log('wasmApi.runRenderLoop called');
     startRenderLoop();
   },
   stopRenderLoop: () => {

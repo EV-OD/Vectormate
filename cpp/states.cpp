@@ -2,5 +2,5 @@
 #include "states.h"
 
 namespace CanvasStates {
-    Uint8 bg[4] = {255, 255, 255, 1};  // Only here!
+    Uint8 bg[4] = {255, 255, 255, 255};  // Only here!
 }

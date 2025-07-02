@@ -1,6 +1,9 @@
 # Makefile for building VectorMate WASM module
 # Requires Emscripten to be installed and available in PATH
 
+# Set Python path to avoid Windows Store redirect
+export PYTHON = "C:\Users\LENOVO LOQ\AppData\Local\Programs\Python\Python313\python.exe"
+
 # Compiler and flags
 EMCC = emcc
 CFLAGS = -std=c++17 -O2
@@ -46,19 +49,28 @@ all: $(OUTPUT_JS)
 # Build the WASM module
 $(OUTPUT_JS): $(SOURCE)
 	@echo "Building VectorMate WASM module..."
-	@mkdir -p $(OUTPUT_DIR)
-	$(EMCC) $(CFLAGS) $(INCLUDES) $(WASM_FLAGS) $(EXPORTED_FUNCTIONS) $(EXPORTED_RUNTIME) \
+	@if not exist $(OUTPUT_DIR) mkdir $(OUTPUT_DIR)
+	set PYTHON="C:\Users\LENOVO LOQ\AppData\Local\Programs\Python\Python313\python.exe" && $(EMCC) $(CFLAGS) $(INCLUDES) $(WASM_FLAGS) $(EXPORTED_FUNCTIONS) $(EXPORTED_RUNTIME) \
 		$(SOURCE) -o $(OUTPUT_JS)
 	@echo "Build complete! Files generated:"
 	@echo "  - $(OUTPUT_JS)"
 	@echo "  - $(OUTPUT_WASM)"
 
 # Clean build artifacts
+ifeq ($(OS),Windows_NT)
+    RM = del /f /q
+else
+    RM = rm -f
+endif
+
+# Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	@rm -f $(OUTPUT_JS)
-	@rm -f $(OUTPUT_WASM)
+	@rm -f $(OUTPUT_JS) $(OUTPUT_WASM)
 	@echo "Clean complete!"
+
+
+
 
 # Debug build with more verbose output
 debug: CFLAGS += -g -DDEBUG

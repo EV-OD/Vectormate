@@ -135,10 +135,10 @@ void Canvas::render()
     // Debug log every 60 frames to avoid spam
     static int frame_count = 0;
     frame_count++;
-    if (frame_count % 60 == 0)
-    {
-        std::cout << "SDL2: Rendered frame " << frame_count << " - Rectangle at (" << std::endl;
-    }
+    // if (frame_count % 60 == 0)
+    // {
+    //     std::cout << "SDL2: Rendered frame " << frame_count << " - Rectangle at (" << std::endl;
+    // }
 }
 
 // Handle mouse down events
@@ -158,7 +158,7 @@ void Canvas::setBackgroundColor(int r, int g, int b, int a)
     bg[0] = (Uint8)r;
     bg[1] = (Uint8)g;
     bg[2] = (Uint8)b;
-    // bg[3] = (Uint8)a;
+    bg[3] = (Uint8)a;
 
     background_color.r = (Uint8)(r);
     background_color.g = (Uint8)(g);
