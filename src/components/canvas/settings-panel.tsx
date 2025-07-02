@@ -29,6 +29,22 @@ export function CanvasSettingsPanel() {
     gridSize, setGridSize 
   } = useCanvasState();
 
+  const handleGridSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    // Allow the input to be empty, which we'll treat as a grid size of 0 internally.
+    if (value === '') {
+      setGridSize(0);
+      return;
+    }
+
+    const parsedValue = parseInt(value, 10);
+    // Only update the state if the parsed value is a valid number.
+    // This prevents the input from breaking if non-numeric characters are entered.
+    if (!isNaN(parsedValue)) {
+      setGridSize(parsedValue);
+    }
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -37,7 +53,7 @@ export function CanvasSettingsPanel() {
           Canvas Settings
         </Button>
       </SheetTrigger>
-      <SheetContent className="custom-scrollbar">
+      <SheetContent className="custom-scrollbar overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Canvas Settings</SheetTitle>
           <SheetDescription>
@@ -79,7 +95,7 @@ export function CanvasSettingsPanel() {
                 type="number"
                 min="1"
                 value={gridSize || ''}
-                onChange={(e) => setGridSize(parseInt(e.target.value) || 0)}
+                onChange={handleGridSizeChange}
               />
             </div>
             <div className="flex items-center justify-between">
