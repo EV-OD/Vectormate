@@ -45,8 +45,8 @@ firebase-debug.log
 firestore-debug.log
 
 
-public/vectormate.js
-public/vectormate.wasm
+# public/vectormate.js
+# public/vectormate.wasm
 
 a.out.wasm
 test.c
