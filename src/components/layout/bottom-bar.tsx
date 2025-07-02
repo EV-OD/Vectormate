@@ -31,7 +31,7 @@ export function BottomBar({ zoomLevel }: BottomBarProps) {
       }, []);
 
   return (
-    <footer className="flex h-10 items-center gap-4 border-t bg-card px-4 text-sm">
+    <footer data-interactive-panel="true" className="flex h-10 items-center gap-4 border-t bg-card px-4 text-sm">
       <div className="flex items-center gap-2">
         <span>Zoom: {zoomLevel}%</span>
       </div>

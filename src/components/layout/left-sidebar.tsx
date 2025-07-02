@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -38,7 +39,7 @@ const layers = [
 
 export function LeftSidebar() {
   return (
-    <div className="absolute top-4 left-4 z-20">
+    <div data-interactive-panel="true" className="absolute top-4 left-4 z-20">
       <Card className="w-64 bg-card/80 backdrop-blur-sm">
         <div className="max-h-[calc(100svh-8rem)] overflow-y-auto custom-scrollbar">
           <Accordion type="single" collapsible defaultValue="item-1" className="w-full">

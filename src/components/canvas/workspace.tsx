@@ -66,13 +66,14 @@ export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
     
     const handleKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement;
-      // If the event is coming from an input or textarea, ignore it so the user can type freely.
-      if (
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA'
-      ) {
+
+      // If the event originates from inside an interactive panel, let the panel handle it.
+      // Do not send the event to the WASM module.
+      if (target.closest('[data-interactive-panel="true"]')) {
         return;
       }
+
+      // Otherwise, the event is for the canvas
       wasmApi.onKeyDown(event.key);
     };
     window.addEventListener('keydown', handleKeyDown);

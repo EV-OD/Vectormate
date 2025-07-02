@@ -110,7 +110,7 @@ export function DebugPanel() {
   };
 
   return (
-    <div className="fixed top-16 right-4 z-50 bg-black/80 text-white p-3 rounded-lg text-sm font-mono max-w-xs">
+    <div data-interactive-panel="true" className="fixed top-16 right-4 z-50 bg-black/80 text-white p-3 rounded-lg text-sm font-mono max-w-xs">
       <div className="mb-2 font-bold">Debug Panel</div>
       <div className="space-y-1">
         <div>WASM Module: <span className={wasmModuleExists ? 'text-green-400' : 'text-red-400'}>

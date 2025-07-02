@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -35,7 +36,7 @@ export function TopToolbar({ zoomLevel, setZoomLevel }: TopToolbarProps) {
   const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 25, 25));
 
   return (
-    <header className="z-10 flex h-14 items-center gap-2 border-b bg-card px-4">
+    <header data-interactive-panel="true" className="z-10 flex h-14 items-center gap-2 border-b bg-card px-4">
       <div className="flex items-center gap-1">
         <div className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
           <svg
