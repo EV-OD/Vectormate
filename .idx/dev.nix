@@ -9,6 +9,7 @@
     pkgs.zulu
     pkgs.openssh          # SSH client & tools (ssh-keygen, ssh-agent)
     pkgs.gh
+    pkgs.gnumake
   ];
   # Sets environment variables in the workspace
   env = {};
