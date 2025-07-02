@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -16,18 +17,17 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import { Switch } from '../ui/switch';
-import { useEffect, useState } from 'react';
 import { ColorPicker } from '../ui/color-picker';
-import { wasmApi } from '@/lib/wasm-bridge';
 import useCanvasState from '@/states/canvasStates';
 import { arrayToRgbaString, rgbaStringToArray } from '@/lib/utils';
 
 
 export function CanvasSettingsPanel() {
-  const { bgColor, setBg } = useCanvasState()
-
-
-
+  const { 
+    bgColor, setBg, 
+    showGrid, setShowGrid, 
+    gridSize, setGridSize 
+  } = useCanvasState();
 
   return (
     <Sheet>
@@ -66,11 +66,26 @@ export function CanvasSettingsPanel() {
             <h4 className="font-medium">Grid & Snapping</h4>
             <div className="flex items-center justify-between">
               <Label htmlFor="show-grid">Show Grid</Label>
-              <Switch id="show-grid" defaultChecked />
+              <Switch 
+                id="show-grid" 
+                checked={showGrid}
+                onCheckedChange={setShowGrid}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="grid-size">Grid Size (px)</Label>
-              <Input id="grid-size" defaultValue="20" />
+              <Input 
+                id="grid-size" 
+                type="number"
+                min="1"
+                value={gridSize}
+                onChange={(e) => {
+                  const newSize = parseInt(e.target.value, 10);
+                  if (!isNaN(newSize)) {
+                    setGridSize(newSize);
+                  }
+                }}
+              />
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="snap-grid">Snap to Grid</Label>

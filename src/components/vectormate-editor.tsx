@@ -1,3 +1,4 @@
+
 'use client';
 
 import { TopToolbar } from '@/components/layout/top-toolbar';
@@ -10,20 +11,19 @@ import { DebugPanel } from '@/components/debug-panel';
 import { useState } from 'react';
 
 export function VectorMateEditor() {
-  const [showGrid, setShowGrid] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(100);
 
   return (
     <div className="grid h-svh w-full grid-rows-[auto_1fr_auto] bg-background text-foreground">
       <TopToolbar zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
       <div className="relative flex flex-1 overflow-hidden border-t">
-        <CanvasWorkspace showGrid={showGrid} zoomLevel={zoomLevel} />
+        <CanvasWorkspace zoomLevel={zoomLevel} />
         <LeftSidebar />
         <RightSidebar />
         <ToolDock />
         {/* <DebugPanel /> */}
       </div>
-      <BottomBar showGrid={showGrid} setShowGrid={setShowGrid} zoomLevel={zoomLevel} />
+      <BottomBar zoomLevel={zoomLevel} />
     </div>
   );
 }

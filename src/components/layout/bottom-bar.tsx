@@ -1,19 +1,19 @@
+
 'use client';
 
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import type { Dispatch, SetStateAction } from 'react';
 import { CanvasSettingsPanel } from '@/components/canvas/settings-panel';
 import { useState, useEffect } from 'react';
+import useCanvasState from '@/states/canvasStates';
 
 interface BottomBarProps {
-  showGrid: boolean;
-  setShowGrid: Dispatch<SetStateAction<boolean>>;
   zoomLevel: number;
 }
 
-export function BottomBar({ showGrid, setShowGrid, zoomLevel }: BottomBarProps) {
+export function BottomBar({ zoomLevel }: BottomBarProps) {
+    const { showGrid, setShowGrid } = useCanvasState();
     const [coords, setCoords] = useState({x: 0, y: 0});
     
     useEffect(() => {

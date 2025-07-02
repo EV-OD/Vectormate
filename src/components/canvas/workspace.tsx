@@ -1,16 +1,18 @@
+
 'use client';
 
 import { useEffect, useRef } from 'react';
 import { initializeWasm, wasmApi, loadWasmScript } from '@/lib/wasm-bridge';
 import { cn } from '@/lib/utils';
+import useCanvasState from '@/states/canvasStates';
 
 interface CanvasWorkspaceProps {
-  showGrid: boolean;
   zoomLevel: number;
 }
 
-export function CanvasWorkspace({ showGrid, zoomLevel }: CanvasWorkspaceProps) {
+export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { showGrid, gridSize } = useCanvasState();
 
   // Initialize WASM module once on mount
   useEffect(() => {
@@ -49,9 +51,6 @@ export function CanvasWorkspace({ showGrid, zoomLevel }: CanvasWorkspaceProps) {
             // Start the render loop
             wasmApi.runRenderLoop();
             
-            // Set initial background (SDL expects 0-255 range, not 0.0-1.0)
-            // wasmApi.setCanvasBackground(240, 240, 240, 255); // Light gray background
-            
             // Log canvas element details for debugging
             console.log('Canvas element:', canvas);
             console.log('Canvas computed style:', window.getComputedStyle(canvas));
@@ -81,10 +80,10 @@ export function CanvasWorkspace({ showGrid, zoomLevel }: CanvasWorkspaceProps) {
     };
   }, []); // Empty dependency array - only run once
 
-  // Update grid settings when showGrid changes
+  // Update grid settings when showGrid or gridSize changes
   useEffect(() => {
-    wasmApi.setGridSettings(showGrid, 20);
-  }, [showGrid]);
+    wasmApi.setGridSettings(showGrid, gridSize);
+  }, [showGrid, gridSize]);
 
   const handleMouseEvent = (handler: (x: number, y: number, button: number) => void) => (
     event: React.MouseEvent<HTMLCanvasElement>
@@ -102,14 +101,14 @@ export function CanvasWorkspace({ showGrid, zoomLevel }: CanvasWorkspaceProps) {
     wasmApi.onMouseMove(x, y);
   };
 
-  const gridSize = 20;
+  const cssGridSize = 20;
 
   return (
     <main
       className="relative flex-1 cursor-crosshair bg-muted/40 h-full"
       style={
         {
-          '--grid-size': `${gridSize}px`,
+          '--grid-size': `${cssGridSize}px`,
           '--grid-color': 'hsl(var(--border))',
           '--grid-bg': 'hsl(var(--background))',
         } as React.CSSProperties
