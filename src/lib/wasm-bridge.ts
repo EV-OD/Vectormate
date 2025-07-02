@@ -56,14 +56,12 @@ let currentApi: WasmApi = { ...placeholderApi };
  */
 export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean> {
   if (wasmInstance) {
-    console.log("WASM module already initialized.");
     return true;
   }
   
   try {
     // Set the canvas ID that Emscripten expects
     canvas.id = 'canvas';
-    console.log("Canvas set with ID:", canvas.id, "Size:", canvas.width, "x", canvas.height);
     
     // Load the WASM module
     const VectorMateModule = (window as any).VectorMateModule;
@@ -75,24 +73,15 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
       return true;
     }
 
-    console.log("VectorMateModule found, initializing...");
-
     // Initialize the module with the canvas
     // === WASM MODULE INSTANTIATION & CALLBACKS ===
     wasmInstance = await VectorMateModule({
       canvas: canvas,
       onRuntimeInitialized: () => {
-      console.log("%cWASM Runtime initialized successfully", "color: green; font-weight: bold;");
-      isInitialized = true;
+        isInitialized = true;
       },
-      print: (text: string) => {
-      // Extra highlighting for stdout
-      console.log("%cWASM stdout:", "color: blue; font-weight: bold;", text);
-      },
-      printErr: (text: string) => {
-      // Extra highlighting for stderr
-      console.error("%cWASM stderr:", "color: red; font-weight: bold;", text);
-      }
+      print: (text: string) => { console.log(text) },
+      printErr: (text: string) => { console.error(text) }
     });
     // === END WASM MODULE INSTANTIATION ===
 
@@ -100,8 +89,6 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
       console.error("Failed to initialize WASM module");
       return false;
     }
-
-    console.log("WASM instance created, waiting for runtime initialization...");
     
     // Wait for runtime to be initialized
     await new Promise<void>((resolve) => {
@@ -114,8 +101,6 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
       };
       checkInit();
     });
-
-    console.log("WASM runtime ready, wrapping functions...");
 
     // Wrap the exported functions using cwrap for type safety and better performance
     const wrappedFunctions: WasmApi = {
@@ -157,7 +142,6 @@ export function isWasmInitialized(): boolean {
  */
 export function startRenderLoop(): void {
   if (renderLoopId) {
-    // console.log("Render loop already running");
     return;
   }
 
@@ -171,7 +155,6 @@ export function startRenderLoop(): void {
   };
 
   renderLoopId = requestAnimationFrame(renderFrame);
-  // console.log("Render loop started");
 }
 
 /**
@@ -181,7 +164,6 @@ export function stopRenderLoop(): void {
   if (renderLoopId) {
     cancelAnimationFrame(renderLoopId);
     renderLoopId = null;
-    console.log("Render loop stopped");
   }
 }
 
@@ -190,21 +172,13 @@ export function stopRenderLoop(): void {
  */
 export const wasmApi = {
   initializeCanvas: (width: number, height: number) => {
-    console.log('wasmApi.initializeCanvas called with:', width, height);
-    if (!isInitialized) {
-      console.warn('WASM not initialized yet, using placeholder');
-      currentApi.initialize_canvas(width, height);
-      return;
-    }
     try {
       currentApi.initialize_canvas(width, height);
-      console.log('wasmApi.initializeCanvas completed successfully');
     } catch (error) {
       console.error('Error in initializeCanvas:', error);
     }
   },
   runRenderLoop: () => {
-    // console.log('wasmApi.runRenderLoop called');
     startRenderLoop();
   },
   stopRenderLoop: () => {
@@ -218,7 +192,6 @@ export const wasmApi = {
     }
   },
   onMouseDown: (x: number, y: number, button: number) => {
-    console.log('wasmApi.onMouseDown called with:', x, y, button);
     try {
       currentApi.on_mouse_down(x, y, button);
     } catch (error) {
@@ -233,7 +206,6 @@ export const wasmApi = {
     }
   },
   onMouseUp: (x: number, y: number, button: number) => {
-    console.log('wasmApi.onMouseUp called with:', x, y, button);
     try {
       currentApi.on_mouse_up(x, y, button);
     } catch (error) {
@@ -241,7 +213,6 @@ export const wasmApi = {
     }
   },
   onKeyDown: (key: string) => {
-    console.log('wasmApi.onKeyDown called with:', key);
     try {
       currentApi.on_key_down(key);
     } catch (error) {
@@ -249,7 +220,6 @@ export const wasmApi = {
     }
   },
   resizeCanvas: (width: number, height: number) => {
-    console.log('wasmApi.resizeCanvas called with:', width, height);
     try {
       currentApi.resize_canvas(width, height);
     } catch (error) {
@@ -264,7 +234,6 @@ export const wasmApi = {
     }
   },
   setGridSettings: (show: boolean, size: number) => {
-    console.log(`[WasmBridge] setGridSettings called with: show=${show}, size=${size}`); // DEBUG
     try {
       currentApi.set_grid_settings(show, size);
     } catch (error) {
@@ -274,7 +243,6 @@ export const wasmApi = {
   
   // Debug function to manually trigger a draw
   debugDraw: () => {
-    console.log('Manual debug draw triggered');
     try {
       if (currentApi.render) {
         currentApi.render();

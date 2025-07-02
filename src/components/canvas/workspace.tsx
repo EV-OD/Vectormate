@@ -38,7 +38,6 @@ export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
             canvas.width = width;
             canvas.height = height;
             
-            console.log(`Setting canvas size to: ${width}x${height}`);
             wasmApi.initializeCanvas(width, height);
             wasmApi.resizeCanvas(width, height);
           };
@@ -50,11 +49,6 @@ export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
             
             // Start the render loop
             wasmApi.runRenderLoop();
-            
-            // Log canvas element details for debugging
-            console.log('Canvas element:', canvas);
-            console.log('Canvas computed style:', window.getComputedStyle(canvas));
-            console.log('Canvas position:', canvas.getBoundingClientRect());
           });
           
           // Add resize observer to handle canvas resizing
@@ -70,7 +64,17 @@ export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
 
     initializeWasmModule();
     
-    const handleKeyDown = (event: KeyboardEvent) => wasmApi.onKeyDown(event.key);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      // If the event is coming from an input or textarea, ignore it so the user can type freely.
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA'
+      ) {
+        return;
+      }
+      wasmApi.onKeyDown(event.key);
+    };
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
