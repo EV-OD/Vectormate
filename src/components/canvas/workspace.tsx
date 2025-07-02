@@ -49,8 +49,8 @@ export function CanvasWorkspace({ showGrid, zoomLevel }: CanvasWorkspaceProps) {
             // Start the render loop
             wasmApi.runRenderLoop();
             
-            // Set initial background
-            wasmApi.setCanvasBackground(0.94, 0.94, 0.94, 1.0); // Light gray background
+            // Set initial background (SDL expects 0-255 range, not 0.0-1.0)
+            // wasmApi.setCanvasBackground(240, 240, 240, 255); // Light gray background
             
             // Log canvas element details for debugging
             console.log('Canvas element:', canvas);
@@ -124,7 +124,6 @@ export function CanvasWorkspace({ showGrid, zoomLevel }: CanvasWorkspaceProps) {
               minHeight: '400px',
               minWidth: '600px',
               display: 'block',
-              backgroundColor: 'white',
               border: '1px solid #ddd'
             }}
             onMouseDown={handleMouseEvent(wasmApi.onMouseDown)}
