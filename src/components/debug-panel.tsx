@@ -1,7 +1,10 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { isWasmInitialized, wasmApi } from '@/lib/wasm-bridge';
+import useCanvasState from '@/states/canvasStates';
+import { arrayToRgbaString } from '@/lib/utils';
 
 export function DebugPanel() {
   const [wasmStatus, setWasmStatus] = useState(false);
@@ -9,13 +12,13 @@ export function DebugPanel() {
   const [wasmModuleExists, setWasmModuleExists] = useState(false);
   const [canvasContext, setCanvasContext] = useState<string>('none');
   const [testResults, setTestResults] = useState<string[]>([]);
+  const { showGrid, gridSize, bgColor } = useCanvasState();
 
   useEffect(() => {
     const updateStatus = () => {
       setWasmStatus(isWasmInitialized());
       setWasmModuleExists(!!(window as any).VectorMateModule);
       
-      // Get canvas size and context info if available
       const canvas = document.querySelector('canvas');
       if (canvas) {
         const rect = canvas.getBoundingClientRect();
@@ -24,7 +27,6 @@ export function DebugPanel() {
           height: Math.round(rect.height)
         });
         
-        // Check what context the canvas is using
         const ctx2d = canvas.getContext('2d');
         const ctxWebgl = canvas.getContext('webgl') || canvas.getContext('webgl2');
         if (ctx2d) setCanvasContext('2D');
@@ -33,7 +35,6 @@ export function DebugPanel() {
       }
     };
 
-    // Update immediately and then every second
     updateStatus();
     const interval = setInterval(updateStatus, 1000);
 
@@ -62,7 +63,6 @@ export function DebugPanel() {
     console.log('WASM test button clicked');
     const results = [];
     
-    // Check if VectorMateModule exists
     const module = (window as any).VectorMateModule;
     if (module) {
       results.push('✓ VectorMateModule is loaded');
@@ -70,14 +70,12 @@ export function DebugPanel() {
       results.push('✗ VectorMateModule not found');
     }
     
-    // Check WASM initialization status
     if (isWasmInitialized()) {
       results.push('✓ WASM is initialized');
     } else {
       results.push('✗ WASM not initialized');
     }
     
-    // Check canvas
     const canvas = document.querySelector('canvas');
     if (canvas) {
       results.push(`✓ Canvas found: ${canvas.width}x${canvas.height}`);
@@ -86,9 +84,8 @@ export function DebugPanel() {
       results.push('✗ Canvas not found');
     }
     
-    // Test basic WASM function call
     try {
-      wasmApi.setCanvasBackground(1.0, 0.0, 0.0, 1.0); // Red background
+      wasmApi.setCanvasBackground(255, 0, 0, 255); // Red background
       results.push('✓ setCanvasBackground called');
     } catch (error) {
       results.push(`✗ setCanvasBackground error: ${error}`);
@@ -113,7 +110,7 @@ export function DebugPanel() {
   };
 
   return (
-    <div className="fixed top-16 right-4 z-50 bg-black/80 text-white p-3 rounded-lg text-sm font-mono">
+    <div className="fixed top-16 right-4 z-50 bg-black/80 text-white p-3 rounded-lg text-sm font-mono max-w-xs">
       <div className="mb-2 font-bold">Debug Panel</div>
       <div className="space-y-1">
         <div>WASM Module: <span className={wasmModuleExists ? 'text-green-400' : 'text-red-400'}>
@@ -126,6 +123,13 @@ export function DebugPanel() {
         <div>Context: <span className={canvasContext === '2D' ? 'text-blue-400' : canvasContext === 'WebGL' ? 'text-green-400' : 'text-red-400'}>
           {canvasContext}
         </span></div>
+        
+        <div className="mt-2 pt-2 border-t border-gray-600">
+          <div className="font-bold mb-1">Canvas State (Zustand)</div>
+          <div>Grid: <span className={showGrid ? 'text-green-400' : 'text-red-400'}>{showGrid ? 'On' : 'Off'}</span></div>
+          <div>Grid Size: {gridSize}px</div>
+          <div>Background: {arrayToRgbaString(bgColor)}</div>
+        </div>
         
         <div className="mt-2 space-y-1">
           <button 
@@ -163,16 +167,14 @@ export function DebugPanel() {
         
         <div className="mt-2 text-xs">
           Test Results:
-          <div className="bg-gray-800 p-2 rounded">
+          <div className="bg-gray-800 p-2 rounded max-h-40 overflow-y-auto custom-scrollbar">
             {testResults.length === 0 && "No tests run yet."}
             {testResults.map((result, index) => (
-              <div key={index} className="flex items-center">
-                {result.startsWith('✓') ? (
-                  <span className="text-green-400 mr-1">✓</span>
-                ) : (
-                  <span className="text-red-400 mr-1">✗</span>
-                )}
-                <div className="whitespace-pre-wrap">{result}</div>
+              <div key={index} className="flex items-start">
+                <span className={result.startsWith('✓') ? 'text-green-400 mr-1' : 'text-red-400 mr-1'}>
+                  {result.startsWith('✓') ? '✓' : '✗'}
+                </span>
+                <span className="whitespace-pre-wrap">{result.substring(2)}</span>
               </div>
             ))}
           </div>

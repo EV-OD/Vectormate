@@ -32,7 +32,8 @@ const placeholderApi: WasmApi = {
     console.log(`PLACEHOLDER: initialize_canvas(${width}, ${height}) - WASM not loaded`);
   },
   render: () => {
-    // Do nothing - let WASM handle rendering
+    // Let WASM handle all rendering. In a real-world scenario, this function 
+    // in C++ would be filled with WebGL calls to draw the scene.
   },
   on_mouse_down: (x: number, y: number, button: number) => console.log(`PLACEHOLDER: on_mouse_down(${x}, ${y}, ${button}) - WASM not loaded`),
   on_mouse_move: (x: number, y: number) => { /* Do nothing */ },
@@ -263,6 +264,7 @@ export const wasmApi = {
     }
   },
   setGridSettings: (show: boolean, size: number) => {
+    console.log(`[WasmBridge] setGridSettings called with: show=${show}, size=${size}`); // DEBUG
     try {
       currentApi.set_grid_settings(show, size);
     } catch (error) {

@@ -28,6 +28,7 @@ const useCanvasState = create<CanvasState>((set, get) => (
 
         gridSize: 20,
         setGridSize(size) {
+            console.log(`[Zustand] setGridSize called with: ${size}`); // DEBUG
             const { showGrid } = get();
             // Always update the state to reflect the input's value.
             // This prevents the input from snapping back to the old value.

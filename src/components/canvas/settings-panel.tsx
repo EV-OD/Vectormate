@@ -31,6 +31,8 @@ export function CanvasSettingsPanel() {
 
   const handleGridSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
+    console.log(`[SettingsPanel] Input value changed: "${value}"`); // DEBUG
+    
     // Allow the input to be empty, which we'll treat as a grid size of 0 internally.
     if (value === '') {
       setGridSize(0);
@@ -38,6 +40,8 @@ export function CanvasSettingsPanel() {
     }
 
     const parsedValue = parseInt(value, 10);
+    console.log(`[SettingsPanel] Parsed value: ${parsedValue}`); // DEBUG
+
     // Only update the state if the parsed value is a valid number.
     // This prevents the input from breaking if non-numeric characters are entered.
     if (!isNaN(parsedValue)) {

@@ -21,7 +21,7 @@ export function VectorMateEditor() {
         <LeftSidebar />
         <RightSidebar />
         <ToolDock />
-        {/* <DebugPanel /> */}
+        <DebugPanel />
       </div>
       <BottomBar zoomLevel={zoomLevel} />
     </div>
