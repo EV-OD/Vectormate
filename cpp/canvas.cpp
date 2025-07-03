@@ -236,8 +236,7 @@ void Canvas::on_drag_end() {
 
 void Canvas::handle_key_down(const char *key)
 {
-    std::string key_str(key);
-    if (key_str == "g" || key_str == "G") {
-        show_grid = !show_grid;
-    }
+    // Key handling logic can be expanded here.
+    // This is now intended for non-UI keys that should be handled by the canvas engine.
+    // Example: std::string key_str(key); if (key_str == "Delete") { ... }
 }

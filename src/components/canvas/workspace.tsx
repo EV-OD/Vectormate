@@ -6,7 +6,7 @@ import useCanvasState from '@/states/canvasStates';
 
 export function CanvasWorkspace() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { showGrid, gridSize, width, height, setZoomLevel, zoomLevel } = useCanvasState();
+  const { showGrid, gridSize, width, height, setZoomLevel, zoomLevel, setShowGrid } = useCanvasState();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -43,6 +43,26 @@ export function CanvasWorkspace() {
     wasmApi.setGridSettings(showGrid, gridSize);
   }, [showGrid, gridSize]);
 
+  // Manual event listener for wheel to set passive: false
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      // The current state is accessed via `getState()` to avoid stale closures in the event listener
+      const currentZoom = useCanvasState.getState().zoomLevel;
+      const newZoom = currentZoom - event.deltaY * 0.1;
+      setZoomLevel(newZoom);
+    };
+
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('wheel', handleWheel);
+    };
+  }, [setZoomLevel]);
+
   const handleMouseEvent = (handler: (x: number, y: number, button: number) => void) => (
     event: React.MouseEvent<HTMLCanvasElement>
   ) => {
@@ -60,13 +80,15 @@ export function CanvasWorkspace() {
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
-    wasmApi.onKeyDown(event.key);
-  };
-
-  const handleWheel = (event: React.WheelEvent<HTMLCanvasElement>) => {
-    event.preventDefault();
-    const newZoom = zoomLevel - event.deltaY * 0.1;
-    setZoomLevel(newZoom);
+    const key = event.key.toLowerCase();
+    // UI-related shortcuts should be handled in React
+    if (key === 'g') {
+      setShowGrid(!showGrid);
+      event.preventDefault(); // Prevent 'g' from being typed if an input is focused
+    } else {
+      // Pass other keys to WASM
+      wasmApi.onKeyDown(event.key);
+    }
   };
 
   return (
@@ -88,7 +110,6 @@ export function CanvasWorkspace() {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseEvent(wasmApi.onMouseUp)}
             onKeyDown={handleKeyDown}
-            onWheel={handleWheel}
             onContextMenu={(e) => e.preventDefault()}
         />
       </div>
