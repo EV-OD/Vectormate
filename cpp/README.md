@@ -34,13 +34,16 @@ make clean                 # Clean build artifacts
 ```
 
 #### Option 3: Manual Build
+This command compiles all necessary C++ source files into the final WASM module.
+
 ```bash
-emcc cpp/main.cpp -o public/vectormate.js \
-  -std=c++17 -O2 \
+emcc cpp/main.cpp cpp/canvas.cpp cpp/states.cpp -o public/vectormate.js \
+  -std=c++17 -O3 -I cpp/includes \
   -s WASM=1 \
   -s USE_SDL=2 \
   -s MODULARIZE=1 \
   -s EXPORT_NAME=VectorMateModule \
+  -s ALLOW_MEMORY_GROWTH=1 \
   -s "EXPORTED_FUNCTIONS=['_initialize_canvas','_render','_on_mouse_down','_on_mouse_move','_on_mouse_up','_on_key_down','_resize_canvas','_set_canvas_background','_set_grid_settings','_set_zoom_level']" \
   -s "EXPORTED_RUNTIME_METHODS=['ccall','cwrap']"
 ```
