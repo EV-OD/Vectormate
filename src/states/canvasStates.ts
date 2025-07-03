@@ -61,7 +61,8 @@ const useCanvasState = create<CanvasState>((set, get) => (
         zoomLevel: 100,
         setZoomLevel(zoom) {
             const newZoom = Math.max(10, Math.min(zoom, 400));
-            wasmApi.setZoomLevel(newZoom / 100.0);
+            // Pass the raw percentage to the bridge. The bridge is responsible for conversion.
+            wasmApi.setZoomLevel(newZoom);
             set({ zoomLevel: newZoom });
         },
     }

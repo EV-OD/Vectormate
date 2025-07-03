@@ -253,6 +253,8 @@ export const wasmApi = {
   setZoomLevel: (zoom: number) => {
     try {
       if (typeof currentApi.set_zoom_level === 'function') {
+        // This is the single source of truth for converting the UI's
+        // percentage value (e.g., 110) to a scale factor (e.g., 1.1).
         currentApi.set_zoom_level(zoom / 100.0);
       } else {
         console.warn('WASM function "set_zoom_level" not available. Was the module rebuilt with the new exports?');
