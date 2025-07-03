@@ -155,7 +155,9 @@ export function startRenderLoop(): void {
 
   const renderFrame = () => {
     try {
-      currentApi.render();
+      if (typeof currentApi.render === 'function') {
+        currentApi.render();
+      }
     } catch (error) {
       console.error("Error in render loop:", error);
     }
@@ -250,7 +252,11 @@ export const wasmApi = {
   },
   setZoomLevel: (zoom: number) => {
     try {
-      currentApi.set_zoom_level(zoom);
+      if (typeof currentApi.set_zoom_level === 'function') {
+        currentApi.set_zoom_level(zoom);
+      } else {
+        console.warn('WASM function "set_zoom_level" not available. Was the module rebuilt with the new exports?');
+      }
     } catch (error) {
       console.error('Error in setZoomLevel:', error);
     }
