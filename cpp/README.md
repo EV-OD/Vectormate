@@ -26,14 +26,7 @@ This directory contains the C++ source code for the VectorMate WASM module that 
 .\build-wasm.ps1 -Debug    # Debug build
 ```
 
-#### Option 2: Makefile (Cross-platform)
-```bash
-make                       # Release build
-make debug                 # Debug build
-make clean                 # Clean build artifacts
-```
-
-#### Option 3: Manual Build
+#### Option 2: Manual Build
 This command compiles all necessary C++ source files into the final WASM module.
 
 ```bash

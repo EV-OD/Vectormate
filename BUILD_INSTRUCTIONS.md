@@ -11,9 +11,6 @@
    ```powershell
    # Using PowerShell script (recommended for Windows)
    .\build-wasm.ps1
-   
-   # Or using make
-   make
    ```
 
 3. **Start the Next.js development server**:
