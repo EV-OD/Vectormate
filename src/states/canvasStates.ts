@@ -20,6 +20,7 @@ interface CanvasState {
     // Viewport
     zoomLevel: number;
     setZoomLevel: (zoom: number) => void;
+    zoomAtPoint: (zoom: number, x: number, y: number) => void;
 }
 
 const useCanvasState = create<CanvasState>((set, get) => (
@@ -60,9 +61,13 @@ const useCanvasState = create<CanvasState>((set, get) => (
         // Viewport
         zoomLevel: 100,
         setZoomLevel(zoom) {
-            const newZoom = Math.max(10, Math.min(zoom, 400));
-            // Pass the raw percentage to the bridge. The bridge is responsible for conversion.
+            const newZoom = Math.max(10, Math.min(zoom, 1000));
             wasmApi.setZoomLevel(newZoom);
+            set({ zoomLevel: newZoom });
+        },
+        zoomAtPoint(zoom, x, y) {
+            const newZoom = Math.max(10, Math.min(zoom, 1000));
+            wasmApi.zoomAtPoint(newZoom, x, y);
             set({ zoomLevel: newZoom });
         },
     }

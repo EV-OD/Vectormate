@@ -6,7 +6,7 @@ import useCanvasState from '@/states/canvasStates';
 
 export function CanvasWorkspace() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { showGrid, setZoomLevel, setShowGrid } = useCanvasState();
+  const { showGrid, zoomAtPoint, setShowGrid } = useCanvasState();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -46,9 +46,15 @@ export function CanvasWorkspace() {
 
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
       const currentZoom = useCanvasState.getState().zoomLevel;
-      const newZoom = currentZoom - event.deltaY * 0.1;
-      setZoomLevel(newZoom);
+      const zoomSensitivity = 0.5;
+      const newZoom = currentZoom - event.deltaY * zoomSensitivity;
+      
+      zoomAtPoint(newZoom, x, y);
     };
 
     canvas.addEventListener('wheel', handleWheel, { passive: false });
@@ -56,7 +62,7 @@ export function CanvasWorkspace() {
     return () => {
       canvas.removeEventListener('wheel', handleWheel);
     };
-  }, [setZoomLevel]);
+  }, [zoomAtPoint]);
 
   const handleMouseEvent = (handler: (x: number, y: number, button: number) => void) => (
     event: React.MouseEvent<HTMLCanvasElement>
@@ -76,10 +82,6 @@ export function CanvasWorkspace() {
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
     const key = event.key.toLowerCase();
-    
-    if (event.target !== event.currentTarget) {
-      return; 
-    }
     
     if (key === 'g') {
       setShowGrid(!showGrid);

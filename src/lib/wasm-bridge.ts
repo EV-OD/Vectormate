@@ -20,6 +20,7 @@ interface WasmApi {
   set_canvas_background: (r: number, g: number, b: number, a: number) => void;
   set_grid_settings: (show: boolean, size: number) => void;
   set_zoom_level: (zoom: number) => void;
+  zoom_at_point: (zoom: number, x: number, y: number) => void;
 }
 
 // Global state
@@ -46,6 +47,7 @@ const placeholderApi: WasmApi = {
   set_canvas_background: (r: number, g: number, b: number, a: number) => console.log(`PLACEHOLDER: set_canvas_background(${r}, ${g}, ${b}, ${a}) - WASM not loaded`),
   set_grid_settings: (show: boolean, size: number) => console.log(`PLACEHOLDER: set_grid_settings(${show}, ${size}) - WASM not loaded`),
   set_zoom_level: (zoom: number) => console.log(`PLACEHOLDER: set_zoom_level(${zoom}) - WASM not loaded`),
+  zoom_at_point: (zoom: number, x: number, y: number) => console.log(`PLACEHOLDER: zoom_at_point(${zoom}, ${x}, ${y}) - WASM not loaded`),
 };
 
 // Current API - starts with placeholders, gets replaced when WASM loads
@@ -121,6 +123,7 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
       set_canvas_background: wasmInstance.cwrap('set_canvas_background', 'void', ['number', 'number', 'number', 'number']),
       set_grid_settings: wasmInstance.cwrap('set_grid_settings', 'void', ['boolean', 'number']),
       set_zoom_level: wasmInstance.cwrap('set_zoom_level', 'void', ['number']),
+      zoom_at_point: wasmInstance.cwrap('zoom_at_point', 'void', ['number', 'number', 'number']),
     };
 
     currentApi = wrappedFunctions;
@@ -252,15 +255,26 @@ export const wasmApi = {
   },
   setZoomLevel: (zoom: number) => {
     try {
+      const zoomFactor = zoom / 100.0;
       if (typeof currentApi.set_zoom_level === 'function') {
-        // This is the single source of truth for converting the UI's
-        // percentage value (e.g., 110) to a scale factor (e.g., 1.1).
-        currentApi.set_zoom_level(zoom / 100.0);
+        currentApi.set_zoom_level(zoomFactor);
       } else {
         console.warn('WASM function "set_zoom_level" not available. Was the module rebuilt with the new exports?');
       }
     } catch (error) {
       console.error('Error in setZoomLevel:', error);
+    }
+  },
+  zoomAtPoint: (zoom: number, x: number, y: number) => {
+    try {
+      const zoomFactor = zoom / 100.0;
+      if (typeof currentApi.zoom_at_point === 'function') {
+        currentApi.zoom_at_point(zoomFactor, x, y);
+      } else {
+        console.warn('WASM function "zoom_at_point" not available. Was the module rebuilt with the new exports?');
+      }
+    } catch (error) {
+      console.error('Error in zoomAtPoint:', error);
     }
   },
   // Debug function to manually trigger a draw
