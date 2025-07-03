@@ -41,7 +41,8 @@ EXPORTED_FUNCTIONS = -s "EXPORTED_FUNCTIONS=[ \
     '_resize_canvas', \
     '_set_canvas_background', \
     '_set_grid_settings', \
-    '_set_zoom_level' \
+    '_set_zoom_level', \
+    '_zoom_at_point' \
 ]"
 
 EXPORTED_RUNTIME = -s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']"
