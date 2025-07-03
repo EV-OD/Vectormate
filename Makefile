@@ -1,8 +1,20 @@
 # Makefile for building VectorMate WASM module
 # Requires Emscripten to be installed and available in PATH
 
-# Set Python path to avoid Windows Store redirect
-export PYTHON = "C:\Users\LENOVO LOQ\AppData\Local\Programs\Python\Python313\python.exe"
+# Detect OS
+ifeq ($(OS),Windows_NT)
+    IS_WINDOWS := 1
+    MKDIR = if not exist $(OUTPUT_DIR) mkdir $(OUTPUT_DIR)
+    RM = del /f /q
+    PYTHON_PATH = C:\Users\LENOVO~1\AppData\Local\Programs\Python\Python313\python.exe
+    SHELL := cmd
+else
+    IS_WINDOWS :=
+    MKDIR = mkdir -p $(OUTPUT_DIR)
+    RM = rm -f
+    PYTHON_PATH = $(shell which python3)
+    SHELL := /bin/bash
+endif
 
 # Compiler and flags
 EMCC = emcc
@@ -19,7 +31,6 @@ WASM_FLAGS = -s WASM=1 \
              -s GL_UNSAFE_OPTS=0 \
              --bind
 
-# Exported functions (must match the ones in main.cpp)
 EXPORTED_FUNCTIONS = -s "EXPORTED_FUNCTIONS=[ \
     '_initialize_canvas', \
     '_render', \
@@ -32,11 +43,8 @@ EXPORTED_FUNCTIONS = -s "EXPORTED_FUNCTIONS=[ \
     '_set_grid_settings' \
 ]"
 
-# Extra exported runtime methods
 EXPORTED_RUNTIME = -s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']"
 
-# Source and output files
-# SOURCE = cpp/canvas.cpp cpp/main.cpp 
 SOURCE = $(wildcard cpp/*.cpp)
 INCLUDES = -Icpp/includes
 OUTPUT_DIR = public
@@ -46,39 +54,25 @@ OUTPUT_WASM = $(OUTPUT_DIR)/vectormate.wasm
 # Default target
 all: $(OUTPUT_JS)
 
-# Build the WASM module
 $(OUTPUT_JS): $(SOURCE)
 	@echo "Building VectorMate WASM module..."
-	@if not exist $(OUTPUT_DIR) mkdir $(OUTPUT_DIR)
-	set PYTHON="C:\Users\LENOVO LOQ\AppData\Local\Programs\Python\Python313\python.exe" && $(EMCC) $(CFLAGS) $(INCLUDES) $(WASM_FLAGS) $(EXPORTED_FUNCTIONS) $(EXPORTED_RUNTIME) \
+	@$(MKDIR)
+	@PYTHON=$(PYTHON_PATH) $(EMCC) $(CFLAGS) $(INCLUDES) $(WASM_FLAGS) $(EXPORTED_FUNCTIONS) $(EXPORTED_RUNTIME) \
 		$(SOURCE) -o $(OUTPUT_JS)
-	@echo "Build complete! Files generated:"
+	@echo "Build complete!"
 	@echo "  - $(OUTPUT_JS)"
 	@echo "  - $(OUTPUT_WASM)"
 
-# Clean build artifacts
-ifeq ($(OS),Windows_NT)
-    RM = del /f /q
-else
-    RM = rm -f
-endif
-
-# Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	@rm -f $(OUTPUT_JS) $(OUTPUT_WASM)
+	@$(RM) $(OUTPUT_JS) $(OUTPUT_WASM)
 	@echo "Clean complete!"
 
-
-
-
-# Debug build with more verbose output
 debug: CFLAGS += -g -DDEBUG
 debug: WASM_FLAGS += -s ASSERTIONS=1 -s SAFE_HEAP=1
 debug: $(OUTPUT_JS)
 	@echo "Debug build complete!"
 
-# Help target
 help:
 	@echo "VectorMate WASM Build System"
 	@echo ""

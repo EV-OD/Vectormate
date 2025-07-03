@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Separator } from '@/components/ui/separator';
@@ -8,12 +7,8 @@ import { CanvasSettingsPanel } from '@/components/canvas/settings-panel';
 import { useState, useEffect } from 'react';
 import useCanvasState from '@/states/canvasStates';
 
-interface BottomBarProps {
-  zoomLevel: number;
-}
-
-export function BottomBar({ zoomLevel }: BottomBarProps) {
-    const { showGrid, setShowGrid } = useCanvasState();
+export function BottomBar() {
+    const { showGrid, setShowGrid, zoomLevel } = useCanvasState();
     const [coords, setCoords] = useState({x: 0, y: 0});
     
     useEffect(() => {
@@ -33,7 +28,7 @@ export function BottomBar({ zoomLevel }: BottomBarProps) {
   return (
     <footer className="flex h-10 items-center gap-4 border-t bg-card px-4 text-sm">
       <div className="flex items-center gap-2">
-        <span>Zoom: {zoomLevel}%</span>
+        <span>Zoom: {Math.round(zoomLevel)}%</span>
       </div>
       <Separator orientation="vertical" className="h-6" />
       <div className="flex items-center gap-2 tabular-nums">

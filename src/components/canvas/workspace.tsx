@@ -1,25 +1,19 @@
-
 'use client';
 
 import { useEffect, useRef } from 'react';
 import { initializeWasm, wasmApi, loadWasmScript } from '@/lib/wasm-bridge';
-import { cn } from '@/lib/utils';
 import useCanvasState from '@/states/canvasStates';
 
-interface CanvasWorkspaceProps {
-  zoomLevel: number;
-}
-
-export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
+export function CanvasWorkspace() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { showGrid, gridSize } = useCanvasState();
+  const { showGrid, gridSize, width, height } = useCanvasState();
 
   // Initialize WASM module once on mount
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    let resizeObserver: ResizeObserver | null = null;
+    let isWasmInitialized = false;
 
     // Load WASM script and initialize the module
     const initializeWasmModule = async () => {
@@ -28,34 +22,11 @@ export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
         const success = await initializeWasm(canvas);
         
         if (success) {
-          // Wait for the canvas to be properly sized
-          const updateCanvasSize = () => {
-            const rect = canvas.getBoundingClientRect();
-            const width = Math.max(rect.width, 800); // Minimum width
-            const height = Math.max(rect.height, 600); // Minimum height
-            
-            // Set canvas internal resolution to match display size
-            canvas.width = width;
-            canvas.height = height;
-            
-            wasmApi.initializeCanvas(width, height);
-            wasmApi.resizeCanvas(width, height);
-          };
-          
-          // Wait a frame to ensure layout is complete
-          requestAnimationFrame(() => {
-            // Initial size setup
-            updateCanvasSize();
-            
-            // Start the render loop
-            wasmApi.runRenderLoop();
-          });
-          
-          // Add resize observer to handle canvas resizing
-          resizeObserver = new ResizeObserver(() => {
-            updateCanvasSize();
-          });
-          resizeObserver.observe(canvas);
+          isWasmInitialized = true;
+          // Initial size setup from state
+          const { width, height } = useCanvasState.getState();
+          wasmApi.initializeCanvas(width, height);
+          wasmApi.runRenderLoop();
         }
       } catch (error) {
         console.error('Failed to initialize WASM module:', error);
@@ -65,8 +36,9 @@ export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
     initializeWasmModule();
     
     return () => {
-      wasmApi.stopRenderLoop();
-      resizeObserver?.disconnect();
+      if (isWasmInitialized) {
+        wasmApi.stopRenderLoop();
+      }
     };
   }, []); // Empty dependency array - only run once
 
@@ -74,6 +46,12 @@ export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
   useEffect(() => {
     wasmApi.setGridSettings(showGrid, gridSize);
   }, [showGrid, gridSize]);
+
+  // Update canvas size when width or height changes in state
+  useEffect(() => {
+      // This resize is handled by the settings panel now.
+      // wasmApi.resizeCanvas(width, height);
+  }, [width, height]);
 
   const handleMouseEvent = (handler: (x: number, y: number, button: number) => void) => (
     event: React.MouseEvent<HTMLCanvasElement>
@@ -91,29 +69,20 @@ export function CanvasWorkspace({ zoomLevel }: CanvasWorkspaceProps) {
     wasmApi.onMouseMove(x, y);
   };
 
-  const cssGridSize = 20;
-
   return (
     <main
       className="relative flex-1 cursor-crosshair bg-muted/40 h-full"
-      style={
-        {
-          '--grid-size': `${cssGridSize}px`,
-          '--grid-color': 'hsl(var(--border))',
-          '--grid-bg': 'hsl(var(--background))',
-        } as React.CSSProperties
-      }
     >
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute inset-0 w-full h-full overflow-auto">
         <canvas
             ref={canvasRef}
             id="canvas"
-            className="w-full h-full block"
+            className="block"
+            width={width}
+            height={height}
             style={{ 
-              minHeight: '400px',
-              minWidth: '600px',
-              display: 'block',
-              border: '1px solid #ddd'
+              border: '1px solid hsl(var(--border))',
+              margin: 'auto', // Center the canvas
             }}
             onMouseDown={handleMouseEvent(wasmApi.onMouseDown)}
             onMouseMove={handleMouseMove}

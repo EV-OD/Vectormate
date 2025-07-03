@@ -19,6 +19,7 @@ interface WasmApi {
   resize_canvas: (new_width: number, new_height: number) => void;
   set_canvas_background: (r: number, g: number, b: number, a: number) => void;
   set_grid_settings: (show: boolean, size: number) => void;
+  set_zoom_level: (zoom: number) => void;
 }
 
 // Global state
@@ -32,8 +33,8 @@ const placeholderApi: WasmApi = {
     console.log(`PLACEHOLDER: initialize_canvas(${width}, ${height}) - WASM not loaded`);
   },
   render: () => {
-    // Let WASM handle all rendering. In a real-world scenario, this function 
-    // in C++ would be filled with WebGL calls to draw the scene.
+    // In a real-world scenario, this function in C++ would be filled
+    // with WebGL calls to draw the scene.
   },
   on_mouse_down: (x: number, y: number, button: number) => console.log(`PLACEHOLDER: on_mouse_down(${x}, ${y}, ${button}) - WASM not loaded`),
   on_mouse_move: (x: number, y: number) => { /* Do nothing */ },
@@ -44,6 +45,7 @@ const placeholderApi: WasmApi = {
   },
   set_canvas_background: (r: number, g: number, b: number, a: number) => console.log(`PLACEHOLDER: set_canvas_background(${r}, ${g}, ${b}, ${a}) - WASM not loaded`),
   set_grid_settings: (show: boolean, size: number) => console.log(`PLACEHOLDER: set_grid_settings(${show}, ${size}) - WASM not loaded`),
+  set_zoom_level: (zoom: number) => console.log(`PLACEHOLDER: set_zoom_level(${zoom}) - WASM not loaded`),
 };
 
 // Current API - starts with placeholders, gets replaced when WASM loads
@@ -55,7 +57,7 @@ let currentApi: WasmApi = { ...placeholderApi };
  * @returns {Promise<boolean>} - True if initialization is successful.
  */
 export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean> {
-  if (wasmInstance) {
+  if (isInitialized) {
     return true;
   }
 
@@ -83,7 +85,8 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
     wasmInstance = await VectorMateModule({
       canvas: canvas,
       onRuntimeInitialized: () => {
-        isInitialized = true;
+        // This is a bit of a race condition fix, we set a flag here
+        // but the main promise resolves below.
       },
       print: (text: string) => { console.log(text) },
       printErr: (text: string) => { console.error(text) }
@@ -96,14 +99,14 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
 
     // Wait for runtime to be fully initialized
     await new Promise<void>((resolve) => {
-      const checkInit = () => {
-        if (isInitialized) {
-          resolve();
-        } else {
-          setTimeout(checkInit, 10);
-        }
-      };
-      checkInit();
+        const check = () => {
+            if (wasmInstance?.calledRun) {
+                resolve();
+            } else {
+                setTimeout(check, 50);
+            }
+        };
+        check();
     });
 
     // Wrap exported functions
@@ -117,6 +120,7 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
       resize_canvas: wasmInstance.cwrap('resize_canvas', 'void', ['number', 'number']),
       set_canvas_background: wasmInstance.cwrap('set_canvas_background', 'void', ['number', 'number', 'number', 'number']),
       set_grid_settings: wasmInstance.cwrap('set_grid_settings', 'void', ['boolean', 'number']),
+      set_zoom_level: wasmInstance.cwrap('set_zoom_level', 'void', ['number']),
     };
 
     currentApi = wrappedFunctions;
@@ -244,7 +248,13 @@ export const wasmApi = {
       console.error('Error in setGridSettings:', error);
     }
   },
-  
+  setZoomLevel: (zoom: number) => {
+    try {
+      currentApi.set_zoom_level(zoom);
+    } catch (error) {
+      console.error('Error in setZoomLevel:', error);
+    }
+  },
   // Debug function to manually trigger a draw
   debugDraw: () => {
     try {

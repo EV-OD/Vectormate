@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -13,27 +12,20 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
-  File,
   Undo,
   Redo,
   Grid,
   Expand,
   ZoomIn,
   ZoomOut,
-  Minus,
-  Plus,
 } from 'lucide-react';
-import type { Dispatch, SetStateAction } from 'react';
 import { Input } from '../ui/input';
+import useCanvasState from '@/states/canvasStates';
 
-interface TopToolbarProps {
-  zoomLevel: number;
-  setZoomLevel: Dispatch<SetStateAction<number>>;
-}
-
-export function TopToolbar({ zoomLevel, setZoomLevel }: TopToolbarProps) {
-  const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 25, 400));
-  const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 25, 25));
+export function TopToolbar() {
+  const { zoomLevel, setZoomLevel } = useCanvasState();
+  const handleZoomIn = () => setZoomLevel(zoomLevel + 25);
+  const handleZoomOut = () => setZoomLevel(zoomLevel - 25);
 
   return (
     <header className="z-10 flex h-14 items-center gap-2 border-b bg-card px-4">
@@ -106,7 +98,7 @@ export function TopToolbar({ zoomLevel, setZoomLevel }: TopToolbarProps) {
           <Input
             type="text"
             className="w-16 h-8 text-center"
-            value={`${zoomLevel}%`}
+            value={`${Math.round(zoomLevel)}%`}
             readOnly
           />
           <Button variant="ghost" size="icon" onClick={handleZoomIn} aria-label="Zoom In">

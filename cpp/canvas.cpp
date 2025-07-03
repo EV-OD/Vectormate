@@ -145,14 +145,21 @@ void Canvas::render()
     // }
 }
 
-// Handle mouse down events
-void on_mouse_down(int x, int y, int button)
+void Canvas::resize(int new_width, int new_height)
 {
-}
+    if (new_width <= 0 || new_height <= 0)
+        return;
 
-// Handle canvas resize
-void resize_canvas(int new_width, int new_height)
-{
+    canvas_width = new_width;
+    canvas_height = new_height;
+
+    emscripten_set_canvas_element_size("#canvas", canvas_width, canvas_height);
+    SDL_SetWindowSize(window, canvas_width, canvas_height);
+
+    // This tells the renderer to scale to the new window size, which is what we want.
+    SDL_RenderSetLogicalSize(renderer, canvas_width, canvas_height);
+
+    std::cout << "SDL2: Canvas resized to " << canvas_width << "x" << canvas_height << std::endl;
 }
 
 // Set canvas background color
@@ -184,6 +191,11 @@ void Canvas::set_grid_settings(bool show, int size)
     std::cout << "SDL2: Grid settings: show=" << show_grid << ", size=" << grid_size << std::endl;
 }
 
+void Canvas::set_zoom(float zoom) {
+    zoom_level = zoom;
+    std::cout << "SDL2: Zoom level set to " << zoom_level << std::endl;
+}
+
 // Cleanup function
 void Canvas::cleanup()
 {
@@ -192,18 +204,71 @@ void Canvas::cleanup()
         SDL_DestroyRenderer(renderer);
         renderer = nullptr;
     }
+    if (window)
+    {
+        SDL_DestroyWindow(window);
+        window = nullptr;
+    }
     SDL_Quit();
     std::cout << "SDL2 cleanup completed" << std::endl;
 }
 
-void Canvas::handleMouseClick(int x, int y)
+void Canvas::handle_mouse_down(int x, int y, int button)
 {
-    // // Handle mouse click events
-    // if(show_grid){
-    //         set_grid_settings(false, 20);
-    // }else{
-    //         set_grid_settings(true, 20);
+    std::cout << "SDL2: Mouse down at (" << x << ", " << y << "), button: " << button << std::endl;
+    last_mouse_pos = {x, y};
 
-    // }
-    std::cout << "SDL2: Mouse clicked at (" << x << ", " << y << ")" << std::endl;
+    if (button == 1) { // Middle mouse button
+        is_panning = true;
+        std::cout << "SDL2: Panning started" << std::endl;
+    } else if (button == 0) { // Left mouse button
+        is_dragging = true;
+        on_drag_start(x, y);
+    }
+}
+
+void Canvas::handle_mouse_move(int x, int y) {
+    int dx = x - last_mouse_pos.x;
+    int dy = y - last_mouse_pos.y;
+
+    if (is_panning) {
+        pan(dx, dy);
+    }
+    
+    if (is_dragging) {
+        on_drag_update(dx, dy);
+    }
+
+    last_mouse_pos = {x, y};
+}
+
+void Canvas::handle_mouse_up(int x, int y, int button) {
+    std::cout << "SDL2: Mouse up at (" << x << ", " << y << "), button: " << button << std::endl;
+    if (button == 1 && is_panning) {
+        is_panning = false;
+        std::cout << "SDL2: Panning stopped" << std::endl;
+    }
+    
+    if (button == 0 && is_dragging) {
+        is_dragging = false;
+        on_drag_end();
+    }
+}
+
+void Canvas::pan(int dx, int dy) {
+    pan_offset.x += dx;
+    pan_offset.y += dy;
+    std::cout << "SDL2: Pan update (" << dx << ", " << dy << "). New offset: (" << pan_offset.x << ", " << pan_offset.y << ")" << std::endl;
+}
+
+void Canvas::on_drag_start(int x, int y) {
+    std::cout << "SDL2: Drag started at (" << x << ", " << y << ")" << std::endl;
+}
+
+void Canvas::on_drag_update(int dx, int dy) {
+    std::cout << "SDL2: Drag update by (" << dx << ", " << dy << ")" << std::endl;
+}
+
+void Canvas::on_drag_end() {
+    std::cout << "SDL2: Drag ended" << std::endl;
 }
