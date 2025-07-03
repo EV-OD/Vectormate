@@ -253,7 +253,7 @@ export const wasmApi = {
   setZoomLevel: (zoom: number) => {
     try {
       if (typeof currentApi.set_zoom_level === 'function') {
-        currentApi.set_zoom_level(zoom);
+        currentApi.set_zoom_level(zoom / 100.0);
       } else {
         console.warn('WASM function "set_zoom_level" not available. Was the module rebuilt with the new exports?');
       }
