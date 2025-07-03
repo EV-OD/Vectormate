@@ -6,17 +6,14 @@ import useCanvasState from '@/states/canvasStates';
 
 export function CanvasWorkspace() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // Get setShowGrid and the current showGrid state
-  const { showGrid, setShowGrid, gridSize, width, height } = useCanvasState();
+  const { showGrid, gridSize, width, height, setZoomLevel, zoomLevel } = useCanvasState();
 
-  // Initialize WASM module once on mount
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     let isWasmInitialized = false;
 
-    // Load WASM script and initialize the module
     const initializeWasmModule = async () => {
       try {
         await loadWasmScript();
@@ -24,7 +21,6 @@ export function CanvasWorkspace() {
         
         if (success) {
           isWasmInitialized = true;
-          // Initial size setup from state
           const { width, height } = useCanvasState.getState();
           wasmApi.initializeCanvas(width, height);
           wasmApi.runRenderLoop();
@@ -41,18 +37,11 @@ export function CanvasWorkspace() {
         wasmApi.stopRenderLoop();
       }
     };
-  }, []); // Empty dependency array - only run once
+  }, []);
 
-  // Update grid settings when showGrid or gridSize changes
   useEffect(() => {
     wasmApi.setGridSettings(showGrid, gridSize);
   }, [showGrid, gridSize]);
-
-  // Update canvas size when width or height changes in state
-  useEffect(() => {
-      // This resize is handled by the settings panel now.
-      // wasmApi.resizeCanvas(width, height);
-  }, [width, height]);
 
   const handleMouseEvent = (handler: (x: number, y: number, button: number) => void) => (
     event: React.MouseEvent<HTMLCanvasElement>
@@ -71,24 +60,20 @@ export function CanvasWorkspace() {
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
-    const key = event.key;
-    // Handle UI-related shortcuts in React
-    if (key.toLowerCase() === 'g') {
-      event.preventDefault(); // Prevent any default browser action for 'g'
-      setShowGrid(!showGrid);
-      return; // Don't forward to WASM
-    }
-    
-    // Forward all other key events to WASM for canvas manipulation
-    wasmApi.onKeyDown(key);
+    wasmApi.onKeyDown(event.key);
   };
 
+  const handleWheel = (event: React.WheelEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
+    const newZoom = zoomLevel - event.deltaY * 0.1;
+    setZoomLevel(newZoom);
+  };
 
   return (
     <main
-      className="relative flex-1 cursor-crosshair bg-muted/40 h-full"
+      className="relative flex-1 cursor-crosshair bg-muted/40 h-full overflow-hidden"
     >
-      <div className="absolute inset-0 w-full h-full overflow-auto">
+      <div className="absolute inset-0 w-full h-full">
         <canvas
             ref={canvasRef}
             id="canvas"
@@ -103,7 +88,8 @@ export function CanvasWorkspace() {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseEvent(wasmApi.onMouseUp)}
             onKeyDown={handleKeyDown}
-            onContextMenu={(e) => e.preventDefault()} // Prevent right-click menu
+            onWheel={handleWheel}
+            onContextMenu={(e) => e.preventDefault()}
         />
       </div>
     </main>

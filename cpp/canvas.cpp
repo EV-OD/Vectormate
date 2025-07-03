@@ -7,222 +7,170 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include "states.h"
+#include "shape.h"
+
+// Helper Functions
+SDL_Point screen_to_world(SDL_Point p, SDL_Point pan, float zoom, int w, int h) {
+    return {
+        (int)(((float)p.x - (float)w / 2.0f) / zoom + pan.x),
+        (int)(((float)p.y - (float)h / 2.0f) / zoom + pan.y)
+    };
+}
+
+SDL_Rect world_to_screen_rect(SDL_Rect r, SDL_Point pan, float zoom, int w, int h) {
+    return {
+        (int)(((float)r.x - pan.x) * zoom + (float)w / 2.0f),
+        (int)(((float)r.y - pan.y) * zoom + (float)h / 2.0f),
+        (int)(r.w * zoom),
+        (int)(r.h * zoom)
+    };
+}
+
+bool is_point_in_rect(SDL_Point p, SDL_Rect r) {
+    return p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+}
 
 // Global state
 Canvas::Canvas(int width, int height)
 {
-    std::cout << "Initializing SDL2 canvas: " << width << "x" << height << std::endl;
-
-    // Make SDL only capture keyboard when #canvas is focused.
-    // This is the key to preventing SDL from blocking text input in other UI elements.
     SDL_SetHint(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas");
 
-    // Ensure minimum dimensions
-    canvas_width = std::max(width, 300); // Use smaller minimum for testing
+    canvas_width = std::max(width, 300);
     canvas_height = std::max(height, 300);
 
-    if (width <= 0 || height <= 0)
-    {
-        std::cout << "Warning: Invalid canvas dimensions, using defaults: "
-                  << canvas_width << "x" << canvas_height << std::endl;
-    }
-
-    // Set canvas size in Emscripten - this must be done first
     emscripten_set_canvas_element_size("#canvas", canvas_width, canvas_height);
 
-    // Initialize SDL with video subsystem
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "SDL initialization failed: " << SDL_GetError() << std::endl;
         return;
     }
-    std::cout << "SDL initialized successfully" << std::endl;
 
-    // For Emscripten, we need to use the proper renderer flags
-    // Try different renderer creation strategies
-
-    // First try: Use SDL_CreateWindowAndRenderer (recommended for Emscripten)
-    if (SDL_CreateWindowAndRenderer(canvas_width, canvas_height, 0, &window, &renderer) < 0)
-    {
-        std::cout << "SDL_CreateWindowAndRenderer failed: " << SDL_GetError() << std::endl;
-
-        // Second try: Create window first, then renderer with specific flags
-        window = SDL_CreateWindow("SDL2 Canvas",
-                                  SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                  canvas_width, canvas_height,
-                                  SDL_WINDOW_SHOWN);
-
-        if (!window)
-        {
-            std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-            SDL_Quit();
-            return;
-        }
-
-        // Try software renderer first (more compatible with Emscripten)
-        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-        if (!renderer)
-        {
-            std::cout << "Software renderer failed, trying accelerated: " << SDL_GetError() << std::endl;
-            renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-        }
-
-        if (!renderer)
-        {
-            std::cout << "Accelerated renderer failed, trying default: " << SDL_GetError() << std::endl;
-            renderer = SDL_CreateRenderer(window, -1, 0); // Default flags
-        }
-
-        if (!renderer)
-        {
-            std::cerr << "All renderer creation attempts failed! SDL_Error: " << SDL_GetError() << std::endl;
-            SDL_DestroyWindow(window);
-            SDL_Quit();
-            return;
-        }
+    if (SDL_CreateWindowAndRenderer(canvas_width, canvas_height, 0, &window, &renderer) < 0) {
+        std::cerr << "SDL_CreateWindowAndRenderer failed: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+        return;
     }
-
     std::cout << "SDL window and renderer created successfully" << std::endl;
 
-    // Set initial background color
-    SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, background_color.b, background_color.a);
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
+    // Create some test shapes
+    shapes.push_back({ShapeType::RECTANGLE, {-50, -50, 100, 100}, {255, 0, 0, 255}});
+    shapes.push_back({ShapeType::RECTANGLE, {100, 100, 80, 120}, {0, 255, 0, 255}});
+    shapes.push_back({ShapeType::RECTANGLE, {-200, 80, 150, 50}, {0, 0, 255, 255}});
 }
 
 void Canvas::draw_grid(SDL_Renderer *renderer)
 {
-    if (!show_grid)
-    {
-        return;
-    }
-    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255); // Light gray grid
+    if (!show_grid) return;
 
-    // Vertical lines
-    for (int x = 0; x < canvas_width; x += grid_size)
-    {
-        SDL_RenderDrawLine(renderer, x, 0, x, canvas_height);
+    SDL_SetRenderDrawColor(renderer, 220, 220, 220, 255); // Light gray grid
+
+    float scaled_grid_size = grid_size * zoom_level;
+    if (scaled_grid_size < 5) return; // Don't draw if grid is too dense
+
+    SDL_Point top_left_world = screen_to_world({0, 0}, pan_offset, zoom_level, canvas_width, canvas_height);
+    SDL_Point bottom_right_world = screen_to_world({canvas_width, canvas_height}, pan_offset, zoom_level, canvas_width, canvas_height);
+
+    int start_x = (int)floor(top_left_world.x / grid_size) * grid_size;
+    int end_x = (int)ceil(bottom_right_world.x / grid_size) * grid_size;
+    int start_y = (int)floor(top_left_world.y / grid_size) * grid_size;
+    int end_y = (int)ceil(bottom_right_world.y / grid_size) * grid_size;
+
+    for (int x = start_x; x <= end_x; x += grid_size) {
+        SDL_Rect r = {(int)x, top_left_world.y, 1, bottom_right_world.y - top_left_world.y};
+        SDL_Rect screen_r = world_to_screen_rect({x, top_left_world.y, 1, bottom_right_world.y - top_left_world.y}, pan_offset, zoom_level, canvas_width, canvas_height);
+        SDL_RenderDrawLine(renderer, screen_r.x, 0, screen_r.x, canvas_height);
     }
 
-    // Horizontal lines
-    for (int y = 0; y < canvas_height; y += grid_size)
-    {
-        SDL_RenderDrawLine(renderer, 0, y, canvas_width, y);
+    for (int y = start_y; y <= end_y; y += grid_size) {
+        SDL_Rect r = {top_left_world.x, (int)y, bottom_right_world.x - top_left_world.x, 1};
+        SDL_Rect screen_r = world_to_screen_rect({top_left_world.x, y, bottom_right_world.x - top_left_world.x, 1}, pan_offset, zoom_level, canvas_width, canvas_height);
+        SDL_RenderDrawLine(renderer, 0, screen_r.y, canvas_width, screen_r.y);
     }
 }
+
+void Canvas::draw_selection_handles(SDL_Renderer *renderer, SDL_Rect rect) {
+    SDL_SetRenderDrawColor(renderer, 0, 100, 255, 255);
+    int handle_size = 8;
+    int half_handle = handle_size / 2;
+
+    // Corners
+    SDL_RenderFillRect(renderer, new SDL_Rect{rect.x - half_handle, rect.y - half_handle, handle_size, handle_size});
+    SDL_RenderFillRect(renderer, new SDL_Rect{rect.x + rect.w - half_handle, rect.y - half_handle, handle_size, handle_size});
+    SDL_RenderFillRect(renderer, new SDL_Rect{rect.x - half_handle, rect.y + rect.h - half_handle, handle_size, handle_size});
+    SDL_RenderFillRect(renderer, new SDL_Rect{rect.x + rect.w - half_handle, rect.y + rect.h - half_handle, handle_size, handle_size});
+}
+
 
 // Main render function
 void Canvas::render()
 {
-    // this will use the list of current objects to render the frame, it will implement the clipping functions
-    if (!renderer)
-    {
-        std::cerr << "Renderer not initialized!" << std::endl;
-        return;
-    }
+    if (!renderer) return;
 
-    // Clear the screen with background color (like the SDL2 docs example)
-    SDL_SetRenderDrawColor(renderer,
-                           background_color.r,
-                           background_color.g,
-                           background_color.b,
-                           background_color.a);
+    SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, background_color.b, background_color.a);
     SDL_RenderClear(renderer);
 
-    // Draw grid
     draw_grid(renderer);
 
-    // Present the rendered frame (like in the docs)
-    SDL_RenderPresent(renderer);
+    for (const auto& shape : shapes) {
+        SDL_Rect screen_rect = world_to_screen_rect(shape.rect, pan_offset, zoom_level, canvas_width, canvas_height);
+        SDL_SetRenderDrawColor(renderer, shape.color.r, shape.color.g, shape.color.b, shape.color.a);
+        SDL_RenderFillRect(renderer, &screen_rect);
+        if(shape.is_selected) {
+            draw_selection_handles(renderer, screen_rect);
+        }
+    }
 
-    // Debug log every 60 frames to avoid spam
-    static int frame_count = 0;
-    frame_count++;
-    // if (frame_count % 60 == 0)
-    // {
-    //     std::cout << "SDL2: Rendered frame " << frame_count << " - Rectangle at (" << std::endl;
-    // }
+    SDL_RenderPresent(renderer);
 }
 
 void Canvas::resize(int new_width, int new_height)
 {
-    if (new_width <= 0 || new_height <= 0)
-        return;
+    if (new_width <= 0 || new_height <= 0) return;
 
     canvas_width = new_width;
     canvas_height = new_height;
 
     emscripten_set_canvas_element_size("#canvas", canvas_width, canvas_height);
     SDL_SetWindowSize(window, canvas_width, canvas_height);
-
-    // This tells the renderer to scale to the new window size, which is what we want.
     SDL_RenderSetLogicalSize(renderer, canvas_width, canvas_height);
 
     std::cout << "SDL2: Canvas resized to " << canvas_width << "x" << canvas_height << std::endl;
 }
 
-// Set canvas background color
 void Canvas::setBackgroundColor(int r, int g, int b, int a)
 {
-    using namespace CanvasStates;
-    bg[0] = (Uint8)r;
-    bg[1] = (Uint8)g;
-    bg[2] = (Uint8)b;
-    bg[3] = (Uint8)a;
-
-    background_color.r = (Uint8)(r);
-    background_color.g = (Uint8)(g);
-    background_color.b = (Uint8)(b);
-    background_color.a = (Uint8)(a);
-
-    std::cout << "SDL2: Background color set to: (" << (int)background_color.r
-              << ", " << (int)background_color.g
-              << ", " << (int)background_color.b
-              << ", " << (int)background_color.a << ")" << std::endl;
+    background_color.r = (Uint8)r;
+    background_color.g = (Uint8)g;
+    background_color.b = (Uint8)b;
+    background_color.a = (Uint8)a;
 }
 
-// Configure grid settings
 void Canvas::set_grid_settings(bool show, int size)
 {
     show_grid = show;
-    grid_size = std::max(5, size); // Minimum grid size of 5 pixels
-
-    std::cout << "SDL2: Grid settings: show=" << show_grid << ", size=" << grid_size << std::endl;
+    grid_size = std::max(5, size);
 }
 
 void Canvas::set_zoom(float zoom) {
-    zoom_level = zoom;
-    std::cout << "SDL2: Zoom level set to " << zoom_level << std::endl;
+    zoom_level = std::max(0.1f, std::min(zoom, 4.0f));
 }
 
-// Cleanup function
 void Canvas::cleanup()
 {
-    if (renderer)
-    {
-        SDL_DestroyRenderer(renderer);
-        renderer = nullptr;
-    }
-    if (window)
-    {
-        SDL_DestroyWindow(window);
-        window = nullptr;
-    }
+    if (renderer) SDL_DestroyRenderer(renderer);
+    if (window) SDL_DestroyWindow(window);
     SDL_Quit();
-    std::cout << "SDL2 cleanup completed" << std::endl;
 }
 
 void Canvas::handle_mouse_down(int x, int y, int button)
 {
-    std::cout << "SDL2: Mouse down at (" << x << ", " << y << "), button: " << button << std::endl;
     last_mouse_pos = {x, y};
 
     if (button == 1) { // Middle mouse button
         is_panning = true;
-        std::cout << "SDL2: Panning started" << std::endl;
     } else if (button == 0) { // Left mouse button
-        is_dragging = true;
         on_drag_start(x, y);
     }
 }
@@ -243,10 +191,8 @@ void Canvas::handle_mouse_move(int x, int y) {
 }
 
 void Canvas::handle_mouse_up(int x, int y, int button) {
-    std::cout << "SDL2: Mouse up at (" << x << ", " << y << "), button: " << button << std::endl;
     if (button == 1 && is_panning) {
         is_panning = false;
-        std::cout << "SDL2: Panning stopped" << std::endl;
     }
     
     if (button == 0 && is_dragging) {
@@ -256,19 +202,42 @@ void Canvas::handle_mouse_up(int x, int y, int button) {
 }
 
 void Canvas::pan(int dx, int dy) {
-    pan_offset.x += dx;
-    pan_offset.y += dy;
-    std::cout << "SDL2: Pan update (" << dx << ", " << dy << "). New offset: (" << pan_offset.x << ", " << pan_offset.y << ")" << std::endl;
+    pan_offset.x -= (float)dx / zoom_level;
+    pan_offset.y -= (float)dy / zoom_level;
 }
 
 void Canvas::on_drag_start(int x, int y) {
-    std::cout << "SDL2: Drag started at (" << x << ", " << y << ")" << std::endl;
+    SDL_Point world_pos = screen_to_world({x, y}, pan_offset, zoom_level, canvas_width, canvas_height);
+    
+    selected_shape_index = -1;
+    for (int i = shapes.size() - 1; i >= 0; --i) {
+        shapes[i].is_selected = false;
+        if (selected_shape_index == -1 && is_point_in_rect(world_pos, shapes[i].rect)) {
+            selected_shape_index = i;
+        }
+    }
+    
+    if (selected_shape_index != -1) {
+        is_dragging = true;
+        shapes[selected_shape_index].is_selected = true;
+    }
 }
 
 void Canvas::on_drag_update(int dx, int dy) {
-    std::cout << "SDL2: Drag update by (" << dx << ", " << dy << ")" << std::endl;
+    if (is_dragging && selected_shape_index != -1) {
+        shapes[selected_shape_index].rect.x += dx / zoom_level;
+        shapes[selected_shape_index].rect.y += dy / zoom_level;
+    }
 }
 
 void Canvas::on_drag_end() {
-    std::cout << "SDL2: Drag ended" << std::endl;
+    is_dragging = false;
+}
+
+void Canvas::handle_key_down(const char *key)
+{
+    std::string key_str(key);
+    if (key_str == "g" || key_str == "G") {
+        show_grid = !show_grid;
+    }
 }

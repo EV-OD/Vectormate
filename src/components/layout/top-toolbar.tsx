@@ -24,8 +24,8 @@ import useCanvasState from '@/states/canvasStates';
 
 export function TopToolbar() {
   const { zoomLevel, setZoomLevel } = useCanvasState();
-  const handleZoomIn = () => setZoomLevel(zoomLevel + 25);
-  const handleZoomOut = () => setZoomLevel(zoomLevel - 25);
+  const handleZoomIn = () => setZoomLevel(zoomLevel + 10);
+  const handleZoomOut = () => setZoomLevel(zoomLevel - 10);
 
   return (
     <header className="z-10 flex h-14 items-center gap-2 border-b bg-card px-4">
