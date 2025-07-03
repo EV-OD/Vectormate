@@ -41,7 +41,7 @@ emcc cpp/main.cpp -o public/vectormate.js \
   -s USE_SDL=2 \
   -s MODULARIZE=1 \
   -s EXPORT_NAME=VectorMateModule \
-  -s "EXPORTED_FUNCTIONS=['_initialize_canvas','_render','_on_mouse_down','_on_mouse_move','_on_mouse_up','_on_key_down','_resize_canvas','_set_canvas_background','_set_grid_settings']" \
+  -s "EXPORTED_FUNCTIONS=['_initialize_canvas','_render','_on_mouse_down','_on_mouse_move','_on_mouse_up','_on_key_down','_resize_canvas','_set_canvas_background','_set_grid_settings','_set_zoom_level']" \
   -s "EXPORTED_RUNTIME_METHODS=['ccall','cwrap']"
 ```
 

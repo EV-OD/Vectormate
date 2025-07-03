@@ -6,7 +6,8 @@ import useCanvasState from '@/states/canvasStates';
 
 export function CanvasWorkspace() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { showGrid, gridSize, width, height } = useCanvasState();
+  // Get setShowGrid and the current showGrid state
+  const { showGrid, setShowGrid, gridSize, width, height } = useCanvasState();
 
   // Initialize WASM module once on mount
   useEffect(() => {
@@ -69,6 +70,20 @@ export function CanvasWorkspace() {
     wasmApi.onMouseMove(x, y);
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
+    const key = event.key;
+    // Handle UI-related shortcuts in React
+    if (key.toLowerCase() === 'g') {
+      event.preventDefault(); // Prevent any default browser action for 'g'
+      setShowGrid(!showGrid);
+      return; // Don't forward to WASM
+    }
+    
+    // Forward all other key events to WASM for canvas manipulation
+    wasmApi.onKeyDown(key);
+  };
+
+
   return (
     <main
       className="relative flex-1 cursor-crosshair bg-muted/40 h-full"
@@ -87,7 +102,7 @@ export function CanvasWorkspace() {
             onMouseDown={handleMouseEvent(wasmApi.onMouseDown)}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseEvent(wasmApi.onMouseUp)}
-            onKeyDown={(e) => wasmApi.onKeyDown(e.key)}
+            onKeyDown={handleKeyDown}
             onContextMenu={(e) => e.preventDefault()} // Prevent right-click menu
         />
       </div>
