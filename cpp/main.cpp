@@ -63,3 +63,7 @@ void set_grid_settings(bool show, int size) {
 void set_zoom_level(float zoom) {
     if(canvas) canvas->set_zoom(zoom);
 }
+
+void zoom_at_point(float zoom_factor, int x, int y) {
+    if(canvas) canvas->zoom_at_point(zoom_factor, x, y);
+}
