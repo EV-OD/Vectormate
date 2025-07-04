@@ -17,6 +17,7 @@ extern "C"
     void set_canvas_background(int r, int g, int b, int a);
     void set_grid_settings(bool show, int size);
     void set_zoom_level(float zoom);
+    void zoom_at_point(float zoom_factor, int x, int y); // <-- add this back
 }
 
 void initialize_canvas(int width, int height) {
