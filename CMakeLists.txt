@@ -50,7 +50,7 @@ set(WASM_FLAGS
 
 # Exported functions for JavaScript interop
 set(EXPORTED_FUNCTIONS
-    "-s EXPORTED_FUNCTIONS=['_initialize_canvas','_render','_on_mouse_down','_on_mouse_move','_on_mouse_up','_on_key_down','_resize_canvas','_set_canvas_background','_set_grid_settings','_set_zoom_level','_zoom_at_point']"
+    "-s EXPORTED_FUNCTIONS=['_initialize_canvas','_render','_on_mouse_down','_on_mouse_move','_on_mouse_up','_on_key_down','_resize_canvas','_set_canvas_background','_set_grid_settings','_set_grid_settings_with_color','_set_zoom_level','_zoom_at_point']"
 )
 
 # Exported runtime methods

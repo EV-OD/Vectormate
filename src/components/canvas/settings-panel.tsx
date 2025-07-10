@@ -26,6 +26,7 @@ export function CanvasSettingsPanel() {
     bgColor, setBg, 
     showGrid, setShowGrid, 
     gridSize, setGridSize,
+    gridColor, setGridColor,
     width, height, setSize,
   } = useCanvasState();
 
@@ -108,6 +109,15 @@ export function CanvasSettingsPanel() {
                 min="1"
                 value={gridSize || ''}
                 onChange={handleNumericInputChange(setGridSize)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Grid Color</Label>
+              <ColorPicker 
+                color={arrayToRgbaString(gridColor)} 
+                onChange={(rgbaStr) => {
+                  setGridColor(rgbaStringToArray(rgbaStr))
+                }} 
               />
             </div>
             <div className="flex items-center justify-between">

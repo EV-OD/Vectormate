@@ -18,7 +18,8 @@ interface WasmApi {
   on_key_down: (key: string) => void;
   resize_canvas: (new_width: number, new_height: number) => void;
   set_canvas_background: (r: number, g: number, b: number, a: number) => void;
-  set_grid_settings: (show: boolean, size: number) => void;
+  set_grid_settings: (show: boolean, size: number, r?: number, g?: number, b?: number, a?: number) => void;
+  set_grid_settings_with_color: (show: boolean, size: number, r: number, g: number, b: number, a: number) => void;
   set_zoom_level: (zoom: number) => void;
   zoom_at_point: (zoom: number, x: number, y: number) => void;
 }
@@ -45,7 +46,8 @@ const placeholderApi: WasmApi = {
     console.log(`PLACEHOLDER: resize_canvas(${new_width}, ${new_height}) - WASM not loaded`);
   },
   set_canvas_background: (r: number, g: number, b: number, a: number) => console.log(`PLACEHOLDER: set_canvas_background(${r}, ${g}, ${b}, ${a}) - WASM not loaded`),
-  set_grid_settings: (show: boolean, size: number) => console.log(`PLACEHOLDER: set_grid_settings(${show}, ${size}) - WASM not loaded`),
+  set_grid_settings: (show: boolean, size: number, r?: number, g?: number, b?: number, a?: number) => console.log(`PLACEHOLDER: set_grid_settings(${show}, ${size}, ${r}, ${g}, ${b}, ${a}) - WASM not loaded`),
+  set_grid_settings_with_color: (show: boolean, size: number, r: number, g: number, b: number, a: number) => console.log(`PLACEHOLDER: set_grid_settings_with_color(${show}, ${size}, ${r}, ${g}, ${b}, ${a}) - WASM not loaded`),
   set_zoom_level: (zoom: number) => console.log(`PLACEHOLDER: set_zoom_level(${zoom}) - WASM not loaded`),
   zoom_at_point: (zoom: number, x: number, y: number) => console.log(`PLACEHOLDER: zoom_at_point(${zoom}, ${x}, ${y}) - WASM not loaded`),
 };
@@ -122,6 +124,7 @@ export async function initializeWasm(canvas: HTMLCanvasElement): Promise<boolean
       resize_canvas: wasmInstance.cwrap('resize_canvas', 'void', ['number', 'number']),
       set_canvas_background: wasmInstance.cwrap('set_canvas_background', 'void', ['number', 'number', 'number', 'number']),
       set_grid_settings: wasmInstance.cwrap('set_grid_settings', 'void', ['boolean', 'number']),
+      set_grid_settings_with_color: wasmInstance.cwrap('set_grid_settings_with_color', 'void', ['boolean', 'number', 'number', 'number', 'number', 'number']),
       set_zoom_level: wasmInstance.cwrap('set_zoom_level', 'void', ['number']),
       zoom_at_point: wasmInstance.cwrap('zoom_at_point', 'void', ['number', 'number', 'number']),
     };
@@ -246,9 +249,13 @@ export const wasmApi = {
       console.error('Error in setCanvasBackground:', error);
     }
   },
-  setGridSettings: (show: boolean, size: number) => {
+  setGridSettings: (show: boolean, size: number, r?: number, g?: number, b?: number, a?: number) => {
     try {
-      currentApi.set_grid_settings(show, size);
+      if (r !== undefined && g !== undefined && b !== undefined && a !== undefined) {
+        currentApi.set_grid_settings_with_color(show, size, r, g, b, a);
+      } else {
+        currentApi.set_grid_settings(show, size);
+      }
     } catch (error) {
       console.error('Error in setGridSettings:', error);
     }

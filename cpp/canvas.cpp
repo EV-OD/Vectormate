@@ -64,10 +64,10 @@ void Canvas::draw_grid(SDL_Renderer *renderer)
 {
     if (!show_grid) return;
 
-    SDL_SetRenderDrawColor(renderer, 220, 220, 220, 255); // Light gray grid
+    SDL_SetRenderDrawColor(renderer, grid_color.r, grid_color.g, grid_color.b, grid_color.a);
 
-    // Draw simple grid without zoom scaling
     for (int x = 0; x < canvas_width; x += grid_size) {
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
         SDL_RenderDrawLine(renderer, x, 0, x, canvas_height);
     }
 
@@ -143,6 +143,22 @@ void Canvas::set_grid_settings(bool show, int size)
 {
     show_grid = show;
     grid_size = std::max(5, size);
+}
+
+void Canvas::set_grid_settings(bool show, int size, int r, int g, int b, int a)
+{
+    show_grid = show;
+    grid_size = std::max(5, size);
+    grid_color.r = (Uint8)r;
+    grid_color.g = (Uint8)g;
+    grid_color.b = (Uint8)b;
+    grid_color.a = (Uint8)a;
+
+
+    CanvasStates::grid_color[0] = (Uint8)r;
+    CanvasStates::grid_color[1] = (Uint8)g;
+    CanvasStates::grid_color[2] = (Uint8)b;
+    CanvasStates::grid_color[3] = (Uint8)a;
 }
 
 void Canvas::set_zoom(float zoom) {

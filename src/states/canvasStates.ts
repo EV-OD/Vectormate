@@ -16,6 +16,8 @@ interface CanvasState {
     setShowGrid: (show: boolean) => void;
     gridSize: number;
     setGridSize: (size: number) => void;
+    gridColor: number[];
+    setGridColor: (rgba: number[]) => void;
 
     // Viewport
     zoomLevel: number;
@@ -36,7 +38,7 @@ const useCanvasState = create<CanvasState>((set, get) => (
         },
         
         // Appearance
-        bgColor: [240, 240, 240, 1],
+        bgColor: [46, 53, 59, 1],
         setBg(rgba) {
             wasmApi.setCanvasBackground(rgba[0], rgba[1], rgba[2], rgba[3] * 255);
             set({ bgColor: rgba });
@@ -45,17 +47,23 @@ const useCanvasState = create<CanvasState>((set, get) => (
         // Grid
         showGrid: true,
         setShowGrid(show) {
-            const { gridSize } = get();
-            wasmApi.setGridSettings(show, gridSize);
+            const { gridSize, gridColor } = get();
+            wasmApi.setGridSettings(show, gridSize, gridColor[0], gridColor[1], gridColor[2], gridColor[3] * 255);
             set({ showGrid: show });
         },
         gridSize: 20,
         setGridSize(size) {
-            const { showGrid } = get();
+            const { showGrid, gridColor } = get();
             set({ gridSize: size });
             if (size > 0) {
-                wasmApi.setGridSettings(showGrid, size);
+                wasmApi.setGridSettings(showGrid, size, gridColor[0], gridColor[1], gridColor[2], gridColor[3] * 255);
             }
+        },
+        gridColor: [173, 172, 172, 0.13], // Default light gray with 50% opacity
+        setGridColor(rgba) {
+            const { showGrid, gridSize } = get();
+            wasmApi.setGridSettings(showGrid, gridSize, rgba[0], rgba[1], rgba[2], rgba[3] * 255);
+            set({ gridColor: rgba });
         },
 
         // Viewport

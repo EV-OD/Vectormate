@@ -15,8 +15,9 @@ public:
 
     bool show_grid = true;
     int grid_size = 20;
+    SDL_Color grid_color = {CanvasStates::grid_color[0], CanvasStates::grid_color[1], CanvasStates::grid_color[2], CanvasStates::grid_color[3]};
 
-    SDL_Color background_color = {245, 245, 245, 255};
+    SDL_Color background_color = {CanvasStates::bg[0], CanvasStates::bg[1], CanvasStates::bg[2], CanvasStates::bg[3]};
 
     bool is_dragging = false;
     SDL_Point last_mouse_pos = {0, 0};
@@ -32,6 +33,7 @@ public:
 
     void setBackgroundColor(int r, int g, int b, int a);
     void set_grid_settings(bool show, int size);
+    void set_grid_settings(bool show, int size, int r, int g, int b, int a);
     void set_zoom(float zoom);  // Stub function for compatibility
     void zoom_at_point(float zoom_factor, int x, int y);  // Stub function for compatibility
 
