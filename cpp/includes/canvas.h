@@ -18,9 +18,6 @@ public:
 
     SDL_Color background_color = {245, 245, 245, 255};
 
-    float zoom_level = 1.0f;
-    SDL_Point pan_offset = {0, 0};
-    bool is_panning = false;
     bool is_dragging = false;
     SDL_Point last_mouse_pos = {0, 0};
     
@@ -35,8 +32,8 @@ public:
 
     void setBackgroundColor(int r, int g, int b, int a);
     void set_grid_settings(bool show, int size);
-    void set_zoom(float zoom);
-    void zoom_at_point(float zoom_factor, int x, int y);
+    void set_zoom(float zoom);  // Stub function for compatibility
+    void zoom_at_point(float zoom_factor, int x, int y);  // Stub function for compatibility
 
     void handle_mouse_down(int x, int y, int button);
     void handle_mouse_move(int x, int y);
@@ -49,5 +46,4 @@ private:
     void on_drag_start(int x, int y);
     void on_drag_update(int dx, int dy);
     void on_drag_end();
-    void pan(int dx, int dy);
 };

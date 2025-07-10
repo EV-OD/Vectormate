@@ -12,19 +12,19 @@
 #include "shape.h"
 
 // Helper Functions
-SDL_Point screen_to_world(SDL_Point p, SDL_Point pan, float zoom, int w, int h) {
+SDL_Point screen_to_world(SDL_Point p, int w, int h) {
     return {
-        (int)(((float)p.x - (float)w / 2.0f) / zoom + pan.x),
-        (int)(((float)p.y - (float)h / 2.0f) / zoom + pan.y)
+        p.x - w / 2,
+        p.y - h / 2
     };
 }
 
-SDL_Rect world_to_screen_rect(SDL_Rect r, SDL_Point pan, float zoom, int w, int h) {
+SDL_Rect world_to_screen_rect(SDL_Rect r, int w, int h) {
     return {
-        (int)(((float)r.x - pan.x) * zoom + (float)w / 2.0f),
-        (int)(((float)r.y - pan.y) * zoom + (float)h / 2.0f),
-        (int)(r.w * zoom),
-        (int)(r.h * zoom)
+        r.x + w / 2,
+        r.y + h / 2,
+        r.w,
+        r.h
     };
 }
 
@@ -66,27 +66,13 @@ void Canvas::draw_grid(SDL_Renderer *renderer)
 
     SDL_SetRenderDrawColor(renderer, 220, 220, 220, 255); // Light gray grid
 
-    float scaled_grid_size = grid_size * zoom_level;
-    if (scaled_grid_size < 5) return; // Don't draw if grid is too dense
-
-    SDL_Point top_left_world = screen_to_world({0, 0}, pan_offset, zoom_level, canvas_width, canvas_height);
-    SDL_Point bottom_right_world = screen_to_world({canvas_width, canvas_height}, pan_offset, zoom_level, canvas_width, canvas_height);
-
-    int start_x = (int)floor(top_left_world.x / grid_size) * grid_size;
-    int end_x = (int)ceil(bottom_right_world.x / grid_size) * grid_size;
-    int start_y = (int)floor(top_left_world.y / grid_size) * grid_size;
-    int end_y = (int)ceil(bottom_right_world.y / grid_size) * grid_size;
-
-    for (int x = start_x; x <= end_x; x += grid_size) {
-        SDL_Rect r = {(int)x, top_left_world.y, 1, bottom_right_world.y - top_left_world.y};
-        SDL_Rect screen_r = world_to_screen_rect({x, top_left_world.y, 1, bottom_right_world.y - top_left_world.y}, pan_offset, zoom_level, canvas_width, canvas_height);
-        SDL_RenderDrawLine(renderer, screen_r.x, 0, screen_r.x, canvas_height);
+    // Draw simple grid without zoom scaling
+    for (int x = 0; x < canvas_width; x += grid_size) {
+        SDL_RenderDrawLine(renderer, x, 0, x, canvas_height);
     }
 
-    for (int y = start_y; y <= end_y; y += grid_size) {
-        SDL_Rect r = {top_left_world.x, (int)y, bottom_right_world.x - top_left_world.x, 1};
-        SDL_Rect screen_r = world_to_screen_rect({top_left_world.x, y, bottom_right_world.x - top_left_world.x, 1}, pan_offset, zoom_level, canvas_width, canvas_height);
-        SDL_RenderDrawLine(renderer, 0, screen_r.y, canvas_width, screen_r.y);
+    for (int y = 0; y < canvas_height; y += grid_size) {
+        SDL_RenderDrawLine(renderer, 0, y, canvas_width, y);
     }
 }
 
@@ -114,7 +100,7 @@ void Canvas::render()
     draw_grid(renderer);
 
     for (const auto& shape : shapes) {
-        SDL_Rect screen_rect = world_to_screen_rect(shape.rect, pan_offset, zoom_level, canvas_width, canvas_height);
+        SDL_Rect screen_rect = world_to_screen_rect(shape.rect, canvas_width, canvas_height);
         SDL_SetRenderDrawColor(renderer, shape.color.r, shape.color.g, shape.color.b, shape.color.a);
         SDL_RenderFillRect(renderer, &screen_rect);
         if(shape.is_selected) {
@@ -154,23 +140,11 @@ void Canvas::set_grid_settings(bool show, int size)
 }
 
 void Canvas::set_zoom(float zoom) {
-    zoom_level = std::max(0.1f, std::min(zoom, 4.0f));
+    // Stub function for JavaScript compatibility - does nothing
 }
 
 void Canvas::zoom_at_point(float zoom_factor, int x, int y) {
-    // Convert screen point to world coordinates before zoom
-    SDL_Point world_pos = screen_to_world({x, y}, pan_offset, zoom_level, canvas_width, canvas_height);
-    
-    // Apply zoom
-    float new_zoom = zoom_level * zoom_factor;
-    new_zoom = std::max(0.1f, std::min(new_zoom, 4.0f));
-    
-    // Calculate new pan offset to keep the point under cursor
-    float zoom_change = new_zoom / zoom_level;
-    pan_offset.x = world_pos.x - ((float)x - (float)canvas_width / 2.0f) / new_zoom;
-    pan_offset.y = world_pos.y - ((float)y - (float)canvas_height / 2.0f) / new_zoom;
-    
-    zoom_level = new_zoom;
+    // Stub function for JavaScript compatibility - does nothing
 }
 
 void Canvas::cleanup()
@@ -184,9 +158,7 @@ void Canvas::handle_mouse_down(int x, int y, int button)
 {
     last_mouse_pos = {x, y};
 
-    if (button == 1) { // Middle mouse button
-        is_panning = true;
-    } else if (button == 0) { // Left mouse button
+    if (button == 0) { // Left mouse button only - no middle button panning
         on_drag_start(x, y);
     }
 }
@@ -195,10 +167,6 @@ void Canvas::handle_mouse_move(int x, int y) {
     int dx = x - last_mouse_pos.x;
     int dy = y - last_mouse_pos.y;
 
-    if (is_panning) {
-        pan(dx, dy);
-    }
-    
     if (is_dragging) {
         on_drag_update(dx, dy);
     }
@@ -207,23 +175,14 @@ void Canvas::handle_mouse_move(int x, int y) {
 }
 
 void Canvas::handle_mouse_up(int x, int y, int button) {
-    if (button == 1 && is_panning) {
-        is_panning = false;
-    }
-    
     if (button == 0 && is_dragging) {
         is_dragging = false;
         on_drag_end();
     }
 }
 
-void Canvas::pan(int dx, int dy) {
-    pan_offset.x -= (float)dx / zoom_level;
-    pan_offset.y -= (float)dy / zoom_level;
-}
-
 void Canvas::on_drag_start(int x, int y) {
-    SDL_Point world_pos = screen_to_world({x, y}, pan_offset, zoom_level, canvas_width, canvas_height);
+    SDL_Point world_pos = screen_to_world({x, y}, canvas_width, canvas_height);
     
     selected_shape_index = -1;
     for (int i = shapes.size() - 1; i >= 0; --i) {
@@ -241,8 +200,8 @@ void Canvas::on_drag_start(int x, int y) {
 
 void Canvas::on_drag_update(int dx, int dy) {
     if (is_dragging && selected_shape_index != -1) {
-        shapes[selected_shape_index].rect.x += dx / zoom_level;
-        shapes[selected_shape_index].rect.y += dy / zoom_level;
+        shapes[selected_shape_index].rect.x += dx;
+        shapes[selected_shape_index].rect.y += dy;
     }
 }
 
