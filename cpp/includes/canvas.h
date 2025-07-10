@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <vector>
 #include "states.h"
 #include "shape.h"
@@ -36,6 +36,7 @@ public:
     void setBackgroundColor(int r, int g, int b, int a);
     void set_grid_settings(bool show, int size);
     void set_zoom(float zoom);
+    void zoom_at_point(float zoom_factor, int x, int y);
 
     void handle_mouse_down(int x, int y, int button);
     void handle_mouse_move(int x, int y);

@@ -1,6 +1,6 @@
 #include "canvas.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <emscripten.h>
 #include <emscripten/html5.h>
 #include <emscripten/val.h>
@@ -155,6 +155,22 @@ void Canvas::set_grid_settings(bool show, int size)
 
 void Canvas::set_zoom(float zoom) {
     zoom_level = std::max(0.1f, std::min(zoom, 4.0f));
+}
+
+void Canvas::zoom_at_point(float zoom_factor, int x, int y) {
+    // Convert screen point to world coordinates before zoom
+    SDL_Point world_pos = screen_to_world({x, y}, pan_offset, zoom_level, canvas_width, canvas_height);
+    
+    // Apply zoom
+    float new_zoom = zoom_level * zoom_factor;
+    new_zoom = std::max(0.1f, std::min(new_zoom, 4.0f));
+    
+    // Calculate new pan offset to keep the point under cursor
+    float zoom_change = new_zoom / zoom_level;
+    pan_offset.x = world_pos.x - ((float)x - (float)canvas_width / 2.0f) / new_zoom;
+    pan_offset.y = world_pos.y - ((float)y - (float)canvas_height / 2.0f) / new_zoom;
+    
+    zoom_level = new_zoom;
 }
 
 void Canvas::cleanup()
