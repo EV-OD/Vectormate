@@ -1,6 +1,5 @@
-#include "canvas.h"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <emscripten.h>
 #include <emscripten/html5.h>
 #include <emscripten/val.h>
@@ -10,6 +9,7 @@
 #include <algorithm>
 #include "states.h"
 #include "shape.h"
+#include "canvas.h"
 
 // Helper Functions
 SDL_Point screen_to_world(SDL_Point p, int w, int h) {
@@ -131,6 +131,12 @@ void Canvas::setBackgroundColor(int r, int g, int b, int a)
     background_color.g = (Uint8)g;
     background_color.b = (Uint8)b;
     background_color.a = (Uint8)a;
+
+    
+    CanvasStates::bg[0] = (Uint8)r;
+    CanvasStates::bg[1] = (Uint8)g;
+    CanvasStates::bg[2] = (Uint8)b;
+    CanvasStates::bg[3] = (Uint8)a;
 }
 
 void Canvas::set_grid_settings(bool show, int size)

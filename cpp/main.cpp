@@ -1,7 +1,10 @@
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <emscripten.h>
 #include <iostream>
+
+
 #include "canvas.h"
+
 
 Canvas *canvas = nullptr;
 
@@ -53,7 +56,10 @@ void resize_canvas(int new_width, int new_height) {
 }
 
 void set_canvas_background(int r, int g, int b, int a) {
-    if (canvas) canvas->setBackgroundColor(r, g, b, a);
+    if (canvas) 
+    {
+        canvas->setBackgroundColor(r, g, b, a);    
+    }
 }
 
 void set_grid_settings(bool show, int size) {
