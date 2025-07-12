@@ -13,6 +13,9 @@ public:
     int canvas_width;
     int canvas_height;
 
+    float zoom_level = 1.0;
+    float world_center[2] = {0,0};
+
     bool show_grid = true;
     int grid_size = 20;
     SDL_Color grid_color = {CanvasStates::grid_color[0], CanvasStates::grid_color[1], CanvasStates::grid_color[2], CanvasStates::grid_color[3]};
@@ -22,18 +25,21 @@ public:
     bool is_dragging = false;
     SDL_Point last_mouse_pos = {0, 0};
     
-    std::vector<Shape> shapes;
+    std::vector<Shape *> shapes;
+    std::vector<Shape> current_shapes;
     int selected_shape_index = -1;
 
     Canvas(int width = 800, int height = 600);
     void cleanup();
 
     void render();
+    void apply_zoom_pan();
     void resize(int new_width, int new_height);
 
     void setBackgroundColor(int r, int g, int b, int a);
     void set_grid_settings(bool show, int size);
     void set_grid_settings(bool show, int size, int r, int g, int b, int a);
+    
     void set_zoom(float zoom);  // Stub function for compatibility
     void zoom_at_point(float zoom_factor, int x, int y);  // Stub function for compatibility
 

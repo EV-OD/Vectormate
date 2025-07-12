@@ -10,6 +10,7 @@
 #include "states.h"
 #include "shape.h"
 #include "canvas.h"
+#include "rectangle.h"
 
 // Helper Functions
 SDL_Point screen_to_world(SDL_Point p, int w, int h) {
@@ -25,6 +26,23 @@ SDL_Rect world_to_screen_rect(SDL_Rect r, int w, int h) {
         r.y + h / 2,
         r.w,
         r.h
+    };
+}
+
+// Helper Functions
+SDL_Point screen_to_world(SDL_Point p, SDL_Point pan, float zoom, int w, int h) {
+    return {
+        (int)(((float)p.x - (float)w / 2.0f) / zoom + pan.x),
+        (int)(((float)p.y - (float)h / 2.0f) / zoom + pan.y)
+    };
+}
+
+SDL_Rect world_to_screen_rect(SDL_Rect r, SDL_Point pan, float zoom, int w, int h) {
+    return {
+        (int)(((float)r.x - pan.x) * zoom + (float)w / 2.0f),
+        (int)(((float)r.y - pan.y) * zoom + (float)h / 2.0f),
+        (int)(r.w * zoom),
+        (int)(r.h * zoom)
     };
 }
 
@@ -54,11 +72,12 @@ Canvas::Canvas(int width, int height)
     }
     std::cout << "SDL window and renderer created successfully" << std::endl;
 
-    // Create some test shapes
-    shapes.push_back({ShapeType::RECTANGLE, {-50, -50, 100, 100}, {255, 0, 0, 255}});
-    shapes.push_back({ShapeType::RECTANGLE, {100, 100, 80, 120}, {0, 255, 0, 255}});
-    shapes.push_back({ShapeType::RECTANGLE, {-200, 80, 150, 50}, {0, 0, 255, 255}});
-}
+    // Create some test shape
+
+    Shape * rectangle = new Rectangle(renderer,600,600,100,100,{255,255,255,255});
+    shapes.push_back(rectangle);
+
+};
 
 void Canvas::draw_grid(SDL_Renderer *renderer)
 {
@@ -77,15 +96,15 @@ void Canvas::draw_grid(SDL_Renderer *renderer)
 }
 
 void Canvas::draw_selection_handles(SDL_Renderer *renderer, SDL_Rect rect) {
-    SDL_SetRenderDrawColor(renderer, 0, 100, 255, 255);
-    int handle_size = 8;
-    int half_handle = handle_size / 2;
+    // SDL_SetRenderDrawColor(renderer, 0, 100, 255, 255);
+    // int handle_size = 8;
+    // int half_handle = handle_size / 2;
 
-    // Corners
-    SDL_RenderFillRect(renderer, new SDL_Rect{rect.x - half_handle, rect.y - half_handle, handle_size, handle_size});
-    SDL_RenderFillRect(renderer, new SDL_Rect{rect.x + rect.w - half_handle, rect.y - half_handle, handle_size, handle_size});
-    SDL_RenderFillRect(renderer, new SDL_Rect{rect.x - half_handle, rect.y + rect.h - half_handle, handle_size, handle_size});
-    SDL_RenderFillRect(renderer, new SDL_Rect{rect.x + rect.w - half_handle, rect.y + rect.h - half_handle, handle_size, handle_size});
+    // // Corners
+    // SDL_RenderFillRect(renderer, new SDL_Rect{rect.x - half_handle, rect.y - half_handle, handle_size, handle_size});
+    // SDL_RenderFillRect(renderer, new SDL_Rect{rect.x + rect.w - half_handle, rect.y - half_handle, handle_size, handle_size});
+    // SDL_RenderFillRect(renderer, new SDL_Rect{rect.x - half_handle, rect.y + rect.h - half_handle, handle_size, handle_size});
+    // SDL_RenderFillRect(renderer, new SDL_Rect{rect.x + rect.w - half_handle, rect.y + rect.h - half_handle, handle_size, handle_size});
 }
 
 
@@ -100,16 +119,21 @@ void Canvas::render()
     draw_grid(renderer);
 
     for (const auto& shape : shapes) {
-        SDL_Rect screen_rect = world_to_screen_rect(shape.rect, canvas_width, canvas_height);
-        SDL_SetRenderDrawColor(renderer, shape.color.r, shape.color.g, shape.color.b, shape.color.a);
-        SDL_RenderFillRect(renderer, &screen_rect);
-        if(shape.is_selected) {
-            draw_selection_handles(renderer, screen_rect);
-        }
+
+        shape->render();
+    //     SDL_Rect screen_rect = world_to_screen_rect(shape.rect, canvas_width, canvas_height);
+    //     SDL_SetRenderDrawColor(renderer, shape.color.r, shape.color.g, shape.color.b, shape.color.a);
+    //     SDL_RenderFillRect(renderer, &screen_rect);
+    //     if(shape.is_selected) {
+    //         draw_selection_handles(renderer, screen_rect);
+    //     }
     }
 
     SDL_RenderPresent(renderer);
 }
+
+
+
 
 void Canvas::resize(int new_width, int new_height)
 {
@@ -161,12 +185,18 @@ void Canvas::set_grid_settings(bool show, int size, int r, int g, int b, int a)
     CanvasStates::grid_color[3] = (Uint8)a;
 }
 
-void Canvas::set_zoom(float zoom) {
-    // Stub function for JavaScript compatibility - does nothing
+void Canvas::set_zoom(float zoom_factor) {
+    zoom_at_point(zoom_factor, canvas_width / 2, canvas_height / 2);
 }
 
 void Canvas::zoom_at_point(float zoom_factor, int x, int y) {
-    // Stub function for JavaScript compatibility - does nothing
+    //nothing here yet
+    
+}
+
+void::Canvas::apply_zoom_pan(){
+    //apply the zoom and pan to update the current_shapes
+    // current_shapes = shapes;
 }
 
 void Canvas::cleanup()
@@ -204,27 +234,27 @@ void Canvas::handle_mouse_up(int x, int y, int button) {
 }
 
 void Canvas::on_drag_start(int x, int y) {
-    SDL_Point world_pos = screen_to_world({x, y}, canvas_width, canvas_height);
+    // SDL_Point world_pos = screen_to_world({x, y}, canvas_width, canvas_height);
     
-    selected_shape_index = -1;
-    for (int i = shapes.size() - 1; i >= 0; --i) {
-        shapes[i].is_selected = false;
-        if (selected_shape_index == -1 && is_point_in_rect(world_pos, shapes[i].rect)) {
-            selected_shape_index = i;
-        }
-    }
+    // selected_shape_index = -1;
+    // for (int i = shapes.size() - 1; i >= 0; --i) {
+    //     shapes[i].is_selected = false;
+    //     if (selected_shape_index == -1 && is_point_in_rect(world_pos, shapes[i].bounding_box)) {
+    //         selected_shape_index = i;
+    //     }
+    // }
     
-    if (selected_shape_index != -1) {
-        is_dragging = true;
-        shapes[selected_shape_index].is_selected = true;
-    }
+    // if (selected_shape_index != -1) {
+    //     is_dragging = true;
+    //     shapes[selected_shape_index].is_selected = true;
+    // }
 }
 
 void Canvas::on_drag_update(int dx, int dy) {
-    if (is_dragging && selected_shape_index != -1) {
-        shapes[selected_shape_index].rect.x += dx;
-        shapes[selected_shape_index].rect.y += dy;
-    }
+    // if (is_dragging && selected_shape_index != -1) {
+    //     shapes[selected_shape_index].rect.x += dx;
+    //     shapes[selected_shape_index].rect.y += dy;
+    // }
 }
 
 void Canvas::on_drag_end() {

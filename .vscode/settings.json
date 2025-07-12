@@ -2,6 +2,8 @@
     "IDX.aI.enableInlineCompletion": true,
     "IDX.aI.enableCodebaseIndexing": true,
     "files.associations": {
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "random": "cpp",
+        "utility": "cpp"
     }
 }

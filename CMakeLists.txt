@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(VectorMate VERSION 1.0.0 LANGUAGES CXX)
+project(VectorMate VERSION 1.0.0 LANGUAGES CXX C)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -71,6 +71,7 @@ endif()
 
 # Include directories
 include_directories(cpp/includes)
+include_directories(cpp/libs)
 
 # Find and configure SDL2 for Emscripten
 if(EMSCRIPTEN)
@@ -84,8 +85,16 @@ endif()
 # Source files
 file(GLOB SOURCES "cpp/*.cpp")
 
+# SDL2_gfx library source files
+file(GLOB SDL2_GFX_SOURCES 
+    "cpp/libs/SDL2_gfxPrimitives.c"
+    "cpp/libs/SDL2_rotozoom.c"
+    "cpp/libs/SDL2_framerate.c"
+    "cpp/libs/SDL2_imageFilter.c"
+)
+
 # Create the WASM module
-add_executable(vectormate ${SOURCES})
+add_executable(vectormate ${SOURCES} ${SDL2_GFX_SOURCES})
 
 # Configure compiler and linker options
 target_compile_options(vectormate PRIVATE 
@@ -132,6 +141,7 @@ message(STATUS "  Project: ${PROJECT_NAME} v${PROJECT_VERSION}")
 message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "  SDL2_gfx: Included from cpp/libs directory")
 message(STATUS "  Output Directory: ${CMAKE_SOURCE_DIR}/public")
 message(STATUS "  Output Files:")
 message(STATUS "    - vectormate.js")

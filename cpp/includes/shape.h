@@ -7,9 +7,14 @@ enum ShapeType {
     CIRCLE
 };
 
-struct Shape {
+class Shape {
+    public:
     ShapeType type;
-    SDL_Rect rect; // Used for rect position/size and circle bounding box
+    SDL_Renderer* renderer;
+    SDL_Rect bounding_box; // Used for rect position/size and circle bounding box
     SDL_Color color;
     bool is_selected = false;
+    bool filled;
+    virtual int render() =0;
+    virtual ~Shape();
 };

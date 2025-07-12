@@ -72,6 +72,7 @@ const useCanvasState = create<CanvasState>((set, get) => (
             const newZoom = Math.max(10, Math.min(zoom, 1000));
             wasmApi.setZoomLevel(newZoom);
             set({ zoomLevel: newZoom });
+            console.log(newZoom);
         },
         zoomAtPoint(zoom, x, y) {
             const newZoom = Math.max(10, Math.min(zoom, 1000));
