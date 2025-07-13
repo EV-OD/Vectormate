@@ -17,4 +17,5 @@ class Shape {
     bool filled;
     virtual int render() =0;
     virtual ~Shape();
+    virtual Shape * get_screen() const = 0;
 };
