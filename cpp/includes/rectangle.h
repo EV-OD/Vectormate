@@ -8,13 +8,14 @@ class Rectangle: public Shape
 {
 
 public:
-    Rectangle(SDL_Renderer* renderer, int x = 0, int y = 0, int width = 100, int height = 100,
+    Rectangle(SDL_Renderer* renderer, float x = 0, float y = 0, float width = 100, float height = 100,
               SDL_Color color = {255, 255, 255, 255},bool filled = true);
+    Rectangle(const Rectangle &other);
 
-    int x;
-    int y;
-    int width;
-    int height;
-    std::array<int, 4> rgba;
+    float x;
+    float y;
+    float width;
+    float height;
     int render() override;
+    Shape * get_screen() const override;
 };

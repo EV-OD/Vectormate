@@ -13,8 +13,9 @@ public:
     int canvas_width;
     int canvas_height;
 
-    float zoom_level = 1.0;
-    float world_center[2] = {0,0};
+    float fStartPanX = 0.0f;
+    float fStartPanY = 0.0f;
+
 
     bool show_grid = true;
     int grid_size = 20;
@@ -24,14 +25,15 @@ public:
 
     bool is_dragging = false;
     SDL_Point last_mouse_pos = {0, 0};
-    
+
     std::vector<Shape *> shapes;
-    std::vector<Shape> current_shapes;
+    std::vector<Shape *> current_shapes;
     int selected_shape_index = -1;
 
     Canvas(int width = 800, int height = 600);
     void cleanup();
 
+    void refresh();
     void render();
     void apply_zoom_pan();
     void resize(int new_width, int new_height);
@@ -39,14 +41,14 @@ public:
     void setBackgroundColor(int r, int g, int b, int a);
     void set_grid_settings(bool show, int size);
     void set_grid_settings(bool show, int size, int r, int g, int b, int a);
-    
-    void set_zoom(float zoom);  // Stub function for compatibility
-    void zoom_at_point(float zoom_factor, int x, int y);  // Stub function for compatibility
+
+    void set_zoom(float zoom);                           // Stub function for compatibility
+    void zoom_at_point(float zoom_factor, int x, int y); // Stub function for compatibility
 
     void handle_mouse_down(int x, int y, int button);
     void handle_mouse_move(int x, int y);
     void handle_mouse_up(int x, int y, int button);
-    void handle_key_down(const char* key);
+    void handle_key_down(const char *key);
 
 private:
     void draw_grid(SDL_Renderer *renderer);
