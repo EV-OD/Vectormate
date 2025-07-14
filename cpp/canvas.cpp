@@ -11,6 +11,7 @@
 #include "shape.h"
 #include "canvas.h"
 #include "rectangle.h"
+#include "utils.h"
 
 bool is_point_in_rect(SDL_Point p, SDL_Rect r)
 {
@@ -167,18 +168,29 @@ void Canvas::set_grid_settings(bool show, int size, int r, int g, int b, int a)
 
 void Canvas::set_zoom(float zoom_factor)
 {
+    std::cout << "Default zoom:" << zoom_factor << std::endl;
     zoom_at_point(zoom_factor, canvas_width / 2, canvas_height / 2);
 }
 
 void Canvas::zoom_at_point(float zoom_factor, int x, int y)
 {
-    // nothing here yet
-}
+    std::cout << "screen mouse position at:" << x << "___" << y << std::endl;
 
-void ::Canvas::apply_zoom_pan()
-{
-    // apply the zoom and pan to update the current_shapes
-    //  current_shapes = shapes;
+    float fMouseWorldX_BeforeZoom, fMouseWorldY_BeforeZoom;
+    screen_to_world(static_cast<float>(x), static_cast<float>(y), fMouseWorldX_BeforeZoom, fMouseWorldY_BeforeZoom);
+    std::cout << "fMouseWorldX_BeforeZoom: " << fMouseWorldX_BeforeZoom << ", fMouseWorldY_BeforeZoom: " << fMouseWorldY_BeforeZoom << std::endl;
+
+    CanvasStates::fScaleX = zoom_factor;
+    CanvasStates::fScaleY = zoom_factor;
+
+    float fMouseWorldX_AfterZoom, fMouseWorldY_AfterZoom;
+    screen_to_world(static_cast<float>(x), static_cast<float>(y), fMouseWorldX_AfterZoom, fMouseWorldY_AfterZoom);
+    std::cout << "fMouseWorldX_AfterZoom: " << fMouseWorldX_AfterZoom << ", fMouseWorldY_AfterZoom: " << fMouseWorldY_AfterZoom << std::endl;
+
+    CanvasStates::fOffsetX += (fMouseWorldX_BeforeZoom - fMouseWorldX_AfterZoom);
+    CanvasStates::fOffsetY += (fMouseWorldY_BeforeZoom - fMouseWorldY_AfterZoom);
+
+    refresh();
 }
 
 void Canvas::cleanup()
@@ -250,8 +262,8 @@ void Canvas::on_drag_start(int x, int y)
 
 void Canvas::on_drag_update(int dx, int dy)
 {
-    CanvasStates::fOffsetX -= (float)dx;
-    CanvasStates::fOffsetY -= (float)dy;
+    CanvasStates::fOffsetX -= (float)dx / CanvasStates::fScaleX;
+    CanvasStates::fOffsetY -= (float)dy / CanvasStates::fScaleY;
     refresh();
 }
 

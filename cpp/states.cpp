@@ -10,4 +10,7 @@ namespace CanvasStates {
 
     float fOffsetX = -500.0f;
     float fOffsetY = -500.0f;
+
+    float fScaleX = 1.0f;
+    float fScaleY = 1.0f;
 }
