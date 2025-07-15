@@ -12,4 +12,7 @@ namespace CanvasStates {
     
     extern float fOffsetX;
     extern float fOffsetY;
+
+    extern float fScaleX;
+    extern float fScaleY;
 }

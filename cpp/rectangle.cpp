@@ -1,5 +1,6 @@
 #include "rectangle.h"
 #include "utils.h"
+#include "states.h"
 
 Rectangle::Rectangle(SDL_Renderer *renderer, float x, float y, float width, float height,
                      SDL_Color color, bool filled)
@@ -49,5 +50,5 @@ Shape *Rectangle::get_screen() const
 {
     float newX, newY;
     world_to_screen(x, y, newX, newY);
-    return new Rectangle(renderer, newX, newY, width, height, color, filled);
+    return new Rectangle(renderer, newX, newY, width * CanvasStates::fScaleX, height * CanvasStates::fScaleY, color, filled);
 };

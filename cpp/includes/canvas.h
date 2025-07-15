@@ -15,8 +15,8 @@ public:
 
     float fStartPanX = 0.0f;
     float fStartPanY = 0.0f;
-
-
+   
+    
     bool show_grid = true;
     int grid_size = 20;
     SDL_Color grid_color = {CanvasStates::grid_color[0], CanvasStates::grid_color[1], CanvasStates::grid_color[2], CanvasStates::grid_color[3]};
@@ -35,7 +35,6 @@ public:
 
     void refresh();
     void render();
-    void apply_zoom_pan();
     void resize(int new_width, int new_height);
 
     void setBackgroundColor(int r, int g, int b, int a);
